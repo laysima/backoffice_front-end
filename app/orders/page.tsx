@@ -75,7 +75,7 @@ const orders = () => {
               ID
             </GridItem>
             <GridItem w="100%" h="10" bg='transparent' alignContent={"center"} >
-              DATE
+              DATES
             </GridItem>
             <GridItem w="100%" h="10" bg='transparent' alignContent={"center"} >
               CUSTOMER NAME
