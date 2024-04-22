@@ -28,10 +28,10 @@ export default function RootLayout({children}: any) {
         
        
         <ChakraProvider>
-        <Flex>
-        <Navbar />
+
+
         <main>{children}</main>
-        </Flex>
+ 
         </ChakraProvider>
 
           

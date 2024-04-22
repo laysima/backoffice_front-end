@@ -27,7 +27,7 @@ const Navbar = () => {
           w={"200px"}
           borderRadius={"20px"}
           ml={3}
-          h={"90vh"}
+          h={"80vh"}
           bgImage={"url('./hexagon.jpg')"}
           bgSize={"cover"}
           bgPos={"center"}
@@ -40,7 +40,7 @@ const Navbar = () => {
 
           <Flex>
             <Flex 
-            p={3}
+              p={3}
               direction={"column"}
               gap={"30px"}
               color={"#D9D9D9"}
@@ -85,20 +85,20 @@ const Navbar = () => {
               <Link
                 as={NextLink}
                 _hover={{ cursor: "pointer" }}
-                className={`link ${pathname === "" ? "active" : ""}`}
-                href=""
+                className={`link ${pathname === "/chat" ? "active" : ""}`}
+                href="/chat"
               >
                 <Flex gap={1} alignItems={"center"}>
                   <Icon fontSize={"l"} as={TiMessages} />
-                  <Text fontSize={"l"}>Chats</Text>
+                  <Text fontSize={"l"}>Messages</Text>
                 </Flex>
               </Link>
 
               <Link
                 as={NextLink}
                 _hover={{ cursor: "pointer" }}
-                className={`link ${pathname === "" ? "active" : ""}`}
-                href=""
+                className={`link ${pathname === "/settings" ? "active" : ""}`}
+                href="/settings"
               >
                 <Flex gap={1} alignItems={"center"}>
                   <Icon fontSize={"l"} as={CiSettings} />

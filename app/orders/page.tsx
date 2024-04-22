@@ -5,25 +5,31 @@ import {
   Button,
   Grid,
   GridItem,
-  Box,
+  Link,
   Divider,
+  Box,
 } from "@chakra-ui/react";
 import { FiPackage } from "react-icons/fi";
+import Navbar from "../components/Navbar";
 
 const orders = () => {
   return (
     <>
-      <Flex bg={"#F9F9F8"}>
-        <Flex direction={"column"} p={"30px"}>
-          <Flex
-            p={3}
-            gap={850}
-            bg={"white"}
-            justify={"center"}
-            align={"center"}
-          >
-            <Text>Add New Products</Text>
-            <Button p={2} bg={"#05A1F8"} color={"white"} borderRadius={0}>
+      <Flex bg={"#F9F9F8"} w={'100%'} h={'100vh'}>
+        <Flex mt={5}>
+          <Navbar />
+        </Flex>
+        <Flex direction={"column"} p={"30px"} w={'100%'}>
+
+          <Flex p={3} bg={"white"} justify={"center"} align={"center"}>
+            <Flex gap={3} align={"center"} flexGrow={1}>
+            <button style={{padding:'7px', background:'#05A1F8', color:'white'}} >
+                <Link href={`/orders/$`}>
+                Order Details
+                </Link>
+            </button>
+            </Flex>
+            <Button flexShrink={0} p={2} bg={"#05A1F8"} color={"white"} borderRadius={0}>
               + Add Orders
             </Button>
           </Flex>
@@ -31,7 +37,7 @@ const orders = () => {
           <Grid
           bg={'white'}
           fontWeight={500}
-            mt={6}
+            mt={70}
             templateColumns="repeat(7, 1fr)"
             gap={6}
             justifyContent={"center"}
@@ -72,25 +78,40 @@ const orders = () => {
             fontSize={"12px"}
           >
             <GridItem w="100%" h="10" bg='transparent' alignContent={"center"} >
-              ID
+              1086
             </GridItem>
             <GridItem w="100%" h="10" bg='transparent' alignContent={"center"} >
-              DATES
+              12, Aug 2024
             </GridItem>
             <GridItem w="100%" h="10" bg='transparent' alignContent={"center"} >
-              CUSTOMER NAME
+              Shakur 
             </GridItem>
             <GridItem w="100%" h="10" bg='transparent' alignContent={"center"} >
-              CUSTOMER ADDRESS
+              PLanners Avenue, Spintex
+            </GridItem>
+            
+            <GridItem w="100%" h="10" bg='transparent' alignContent={"center"} >
+              <Box bg={'#C3EEB8'} >
+                  <Flex gap={3} alignItems={"center"} justifyContent={"center"} p={2}>
+                    <Box borderRadius={'full'} w={'15px'} h={'15px'} bg={'#63B96C'}>
+                    </Box>
+                    <Text color={"black"}>
+                      paid
+                    </Text>
+                  </Flex>
+              </Box>
             </GridItem>
             <GridItem w="100%" h="10" bg='transparent' alignContent={"center"} >
-              PAYMENT STATUS
+            <Flex gap={3} alignItems={"center"} justifyContent={"center"} p={2}>
+                    <Box borderRadius={'full'} w={'15px'} h={'15px'} bg={'#63B96C'}>
+                    </Box>
+                    <Text color={"black"}>
+                      Delivered
+                    </Text>
+                  </Flex>
             </GridItem>
             <GridItem w="100%" h="10" bg='transparent' alignContent={"center"} >
-              ORDER STATUS
-            </GridItem>
-            <GridItem w="100%" h="10" bg='transparent' alignContent={"center"} >
-              ITEMS
+              10 items
             </GridItem>
           </Grid>
           <Divider border={"0.5px solid black"} orientation="horizontal" />
@@ -127,72 +148,7 @@ const orders = () => {
             </GridItem>
           </Grid>
           <Divider border={"0.5px solid black"} orientation="horizontal" />
-
-          <Grid
-            mt={6}
-            templateColumns="repeat(7, 1fr)"
-            gap={6}
-            justifyContent={"center"}
-            alignContent={"center"}
-            textAlign={"center"}
-            fontSize={"12px"}
-          >
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              ID
-            </GridItem>
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              DATE
-            </GridItem>
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              CUSTOMER NAME
-            </GridItem>
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              CUSTOMER ADDRESS
-            </GridItem>
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              PAYMENT STATUS
-            </GridItem>
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              ORDER STATUS
-            </GridItem>
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              ITEMS
-            </GridItem>
-          </Grid>
-          <Divider border={"0.5px solid black"} orientation="horizontal" />
-
-          <Grid
-            mt={6}
-            templateColumns="repeat(7, 1fr)"
-            gap={6}
-            justifyContent={"center"}
-            alignContent={"center"}
-            textAlign={"center"}
-            fontSize={"12px"}
-          >
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              ID
-            </GridItem>
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              DATE
-            </GridItem>
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              CUSTOMER NAME
-            </GridItem>
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              CUSTOMER ADDRESS
-            </GridItem>
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              PAYMENT STATUS
-            </GridItem>
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              ORDER STATUS
-            </GridItem>
-            <GridItem w="100%" h="10" bg="transparent" alignContent={"center"}>
-              ITEMS
-            </GridItem>
-          </Grid>
-          <Divider border={"0.5px solid black"} orientation="horizontal" />
+  
         </Flex>
       </Flex>
     </>

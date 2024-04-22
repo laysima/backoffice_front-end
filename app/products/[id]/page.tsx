@@ -1,15 +1,26 @@
+'use client'
 import React from 'react'
-import { Flex, Text, Box, Image, Link,Button, Divider, FormControl, FormLabel, FormHelperText, Input  } from '@chakra-ui/react'
+import { Flex, Text, Box, Image, Link,Button, Divider, FormControl, FormLabel, Icon, Input  } from '@chakra-ui/react'
+import { IoIosArrowRoundBack } from "react-icons/io";
+import { useRouter } from 'next/navigation';
 
 const addProducts = () => {
+  const router = useRouter();
+
+  const handleGoBack = () => {
+    router.back(); // Navigates to the previous page
+  };
   return (
     <>
+     <Flex ml={10}>
+      <Icon cursor={'pointer'} onClick={handleGoBack} fontSize={'50px'} as={IoIosArrowRoundBack} />
+    </Flex>
+    <Flex justify={'center'} bg={"#F9F9F8"} align={'center'} h={'100vh'}>
       <Flex bg={"#F9F9F8"}>
       <Flex direction={"column"} p={"30px"}>
         <Flex p={3} gap={700} bg={"white"} justify={"center"} align={"center"}>
           <Text>Add New Products</Text>
-          <Flex gap={5} alignItems={"center"}>
-          <Text>Cancel</Text>
+          <Flex alignItems={"center"}>
              <Button p={2} bg={"#05A1F8"} color={'white'} borderRadius={0}>
                 Save Changes
             </Button>  
@@ -29,7 +40,7 @@ const addProducts = () => {
 
             <Flex mt={5} gap={10}>
               <Box bg={'#F9F9F8'} w={'300px'} h={'400px'} justifyContent={'center'} alignContent={'center'} _hover={{cursor:'pointer'}}>
-                <Text fontSize={'2xl'} textAlign={'center'}>Click To Upload Image</Text>
+                <Input display={'inline-block'} border={'none'} type='file' />
               </Box>
 
               <Flex direction={'column'}>
@@ -70,8 +81,7 @@ const addProducts = () => {
         </Flex>
 
       </Flex>
-
-     
+      </Flex>
       </Flex>
 
     </>
