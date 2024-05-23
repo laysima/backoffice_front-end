@@ -17,7 +17,8 @@ const PaginationControls: FC<PaginationControlsProps> = ({
   const searchParams = useSearchParams();
 
   const page = searchParams.get("page") ?? "1";
-  const per_page = searchParams.get("per_page") ?? "8";
+  const per_page = searchParams.get("per_page") ?? "4";
+
 
   return (
     <Stack
@@ -30,7 +31,7 @@ const PaginationControls: FC<PaginationControlsProps> = ({
     >
       <button
         style={{
-          backgroundColor: "#378ba4",
+          backgroundColor: "#0881DE",
           padding: "5px",
           color: "white",
           borderRadius: "5px",
@@ -38,7 +39,7 @@ const PaginationControls: FC<PaginationControlsProps> = ({
         }}
         disabled={!hasPrevPage}
         onClick={() => {
-          router.push(`/shop?page=${Number(page) - 1}&per_page=${per_page}`);
+          router.push(`/products?page=${Number(page) - 1}&per_page=${per_page}`);
         }}
       >
         Prev page
@@ -50,7 +51,7 @@ const PaginationControls: FC<PaginationControlsProps> = ({
 
       <button
         style={{
-          backgroundColor: "#378ba4",
+          backgroundColor: "#0881DE",
           padding: "5px",
           color: "white",
           borderRadius: "5px",
@@ -58,7 +59,7 @@ const PaginationControls: FC<PaginationControlsProps> = ({
         }}
         disabled={!hasNextPage}
         onClick={() => {
-          router.push(`/shop?page=${Number(page) + 1}&per_page=${per_page}`);
+          router.push(`/products?page=${Number(page) + 1}&per_page=${per_page}`);
         }}
       >
         Next page

@@ -18,7 +18,7 @@ const chat = () => {
   return (
     <>
       <Flex bg={"#F9F9F8"} h={"100vh"}>
-        <Flex mt={5}>
+        <Flex>
           <Navbar />
         </Flex>
         <Flex direction={"column"} p={"30px"}>

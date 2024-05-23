@@ -22,23 +22,20 @@ const Navbar = () => {
   const pathname = usePathname();
   return (
     <nav>
-      <Grid templateColumns={"1"} gap={5} p={3} bg={'#F9F9F8'}>
+      <Grid templateColumns={"1"} gap={5} bg={'#F9F9F8'}>
         <GridItem
-          w={"200px"}
-          borderRadius={"20px"}
-          ml={3}
-          h={"80vh"}
+          w={"230px"}
+          h={'100vh'}
           bgImage={"url('./hexagon.jpg')"}
           bgSize={"cover"}
           bgPos={"center"}
+          alignItems={"center"}
         >
           <Flex w={"full"} justify={"center"}>
             <Box w={"180px"} mt={"20px"}>
               <Image objectFit={"cover"} src="pharmainc2.svg"></Image>
             </Box>
           </Flex>
-
-          <Flex>
             <Flex 
               p={3}
               direction={"column"}
@@ -46,9 +43,9 @@ const Navbar = () => {
               color={"#D9D9D9"}
               mt={"50px"}
             >
-              <Link
+              <Flex w={'full'}
                 as={NextLink}
-                _hover={{ cursor: "pointer" }}
+                _hover={{ cursor: "pointer", bg:'#041E42', color:'white',p:'14px',transition:'0.3s', borderRadius:'0px', width:'100%'}}
                 className={`link ${pathname === "/dashboard" ? "active" : ""}`}
                 href="/dashboard"
               >
@@ -56,11 +53,11 @@ const Navbar = () => {
                   <Icon fontSize={"l"} as={MdOutlineDashboard} />
                   <Text fontSize={"l"}>Dashboard</Text>
                 </Flex>
-              </Link>
+              </Flex>
 
               <Link
                 as={NextLink}
-                _hover={{ cursor: "pointer" }}
+                _hover={{ cursor: "pointer",bg:'#041E42', color:'white',p:'14px',transition:'0.3s', borderRadius:'0px', width:'100%' }}
                 className={`link ${pathname === "/products" ? "active" : ""}`}
                 href="/products"
               >
@@ -72,7 +69,7 @@ const Navbar = () => {
 
               <Link
                 as={NextLink}
-                _hover={{ cursor: "pointer" }}
+                _hover={{ cursor: "pointer",bg:'#041E42', color:'white',p:'14px',transition:'0.3s', borderRadius:'0px', width:'100%' }}
                 className={`link ${pathname === "/orders" ? "active" : ""}`}
                 href="/orders"
               >
@@ -84,7 +81,7 @@ const Navbar = () => {
 
               <Link
                 as={NextLink}
-                _hover={{ cursor: "pointer" }}
+                _hover={{ cursor: "pointer",bg:'#041E42', color:'white',p:'14px',transition:'0.3s', borderRadius:'0px', width:'100%' }}
                 className={`link ${pathname === "/chat" ? "active" : ""}`}
                 href="/chat"
               >
@@ -96,7 +93,7 @@ const Navbar = () => {
 
               <Link
                 as={NextLink}
-                _hover={{ cursor: "pointer" }}
+                _hover={{ cursor: "pointer",bg:'#041E42', color:'white',p:'14px',transition:'0.3s', borderRadius:'0px', width:'100%' }}
                 className={`link ${pathname === "/settings" ? "active" : ""}`}
                 href="/settings"
               >
@@ -106,7 +103,6 @@ const Navbar = () => {
                 </Flex>
               </Link>
             </Flex>
-          </Flex>
         </GridItem>
       </Grid>
     </nav>
