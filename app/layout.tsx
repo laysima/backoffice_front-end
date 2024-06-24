@@ -4,6 +4,12 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from './components/Navbar';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { getCookie } from "cookies-next";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,6 +19,18 @@ const inter = Inter({ subsets: ["latin"] });
 // };
 
 export default function RootLayout({children}: any) {
+  const router = useRouter();
+  const session = getCookie("session");
+
+  useEffect(()=> {
+    if (!session) {
+      router.replace('/')
+    }
+  }, [])
+
+  const queryClient = new QueryClient()
+
+  
   return (
     <html lang="en">
           <head>
@@ -28,10 +46,9 @@ export default function RootLayout({children}: any) {
         
        
         <ChakraProvider>
-
-
-        <main>{children}</main>
- 
+        <QueryClientProvider client={queryClient}>
+          <main>{children}</main>
+        </QueryClientProvider>
         </ChakraProvider>
 
           

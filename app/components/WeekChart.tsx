@@ -14,13 +14,13 @@ const WeekChart = () => {
           data: {
             labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
             datasets: [{
-              label: 'Sample Data',
+              label: 'Customer Data',
               data: [15, 25, 4, 80, 45, 30, 75], // Sample data for each day
               borderColor: '#1C76FD',
               borderWidth: 2,
               fill: {
                 target: 'origin',
-                above: 'rgba(143, 0, 255, 0.2)' // Fill color with opacity 20%
+                above: 'rgba(255, 255, 255, 1)' // Fill color with opacity 20%
               }
             }]
           },

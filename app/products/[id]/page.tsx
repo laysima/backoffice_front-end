@@ -13,10 +13,11 @@ import {
   Icon,
   Input,
   useToast,
+  FormHelperText,
 } from "@chakra-ui/react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { useRouter } from "next/navigation";
-import { CreateProduct } from "@/api";
+import { CreateProduct } from "@/app/api";
 import { ProductType } from "@/Schemas";
 
 const AddProducts = () => {
@@ -103,7 +104,6 @@ const AddProducts = () => {
   };
   
   
-  
 
   return (
     <>
@@ -118,24 +118,11 @@ const AddProducts = () => {
       <Flex justify={"center"} bg={"#F9F9F8"} align={"center"} h={"100vh"}>
         <Flex bg={"#F9F9F8"}>
           <Flex direction={"column"} p={"30px"}>
-            <Flex
-              p={3}
-              gap={700}
-              bg={"white"}
-              justify={"center"}
-              align={"center"}
-            >
+            <Flex p={3} gap={700} bg={"white"} justify={"center"} align={"center"}>
               <Text>Add New Products</Text>
               <Flex alignItems={"center"}>
-                <Button
-                  p={2}
-                  bg={"#05A1F8"}
-                  color={"white"}
-                  borderRadius={0}
-                  onClick={() => handleProductCreate(data)}
-                  disabled={loading}
-                >
-                  {loading ? "Creating Product" : "Save Changes"}
+                <Button p={2} bg={"#05A1F8"} color={"white"} borderRadius={0} onClick={() => handleProductCreate(data)} disabled={loading}>
+                  {loading ? "Creating Product" : "Created"}
                 </Button>
               </Flex>
             </Flex>
@@ -206,17 +193,8 @@ const AddProducts = () => {
 
                       <FormControl w={"full"}>
                         <FormLabel fontWeight={"bold"}>Dosage</FormLabel>
-                        <Input
-                          id="dosage"
-                          variant={"flushed"}
-                          bg={"#F9F9F8"}
-                          w={"300px"}
-                          borderRadius={0}
-                          type="text"
-                          name="dosage"
-                          value={data.dosage}
-                          onChange={handleInputChange}
-                        />
+                        <Input id="dosage" variant={"flushed"} bg={"#F9F9F8"} w={"300px"} borderRadius={0} type="text"
+                          name="dosage" value={data.dosage} onChange={handleInputChange}/>
                       </FormControl>
                     </Flex>
 
@@ -243,6 +221,7 @@ const AddProducts = () => {
                           variant={"flushed"}
                           bg={"#F9F9F8"}
                           w={"300px"}
+                          placeholder="in kg"
                           borderRadius={0}
                           type="number"
                           name="weight"
