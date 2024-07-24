@@ -8,18 +8,31 @@ import {
   Box,
   Icon,
   Link,
+  Button,
 } from "@chakra-ui/react";
 import { MdOutlineDashboard, MdOutlineListAlt } from "react-icons/md";
 import { FiPackage } from "react-icons/fi";
 import { TiMessages } from "react-icons/ti";
 import { CiSettings } from "react-icons/ci";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import React from "react";
 import NextLink from "next/link";
+import { BiLogOut } from "react-icons/bi";
+import { deleteCookie, getCookie } from "cookies-next";
 
 const Navbar = () => {
   const pathname = usePathname();
+
+  const router = useRouter();
+
+  const session = getCookie("session");
+  const nSession = session && JSON.parse(session);
+
+  const handleLogout = () => {
+    deleteCookie("session");
+    router.replace("/");
+  };
   return (
     <nav>
       <Grid templateColumns={"1"} gap={5} bg={'#F9F9F8'}>
@@ -45,7 +58,7 @@ const Navbar = () => {
             >
               <Flex w={'full'}
                 as={NextLink}
-                _hover={{ cursor: "pointer", bg:'#041E42', color:'white',p:'14px',transition:'0.3s', borderRadius:'0px', width:'100%'}}
+                _hover={{ cursor: "pointer", bg:'#041E42', color:'white',p:'14px',transition:'0.1s', borderRadius:'10px', width:'100%'}}
                 className={`link ${pathname === "/dashboard" ? "active" : ""}`}
                 href="/dashboard"
               >
@@ -57,7 +70,7 @@ const Navbar = () => {
 
               <Link
                 as={NextLink}
-                _hover={{ cursor: "pointer",bg:'#041E42', color:'white',p:'14px',transition:'0.3s', borderRadius:'0px', width:'100%' }}
+                _hover={{ cursor: "pointer",bg:'#041E42', color:'white',p:'14px',transition:'0.1s', borderRadius:'10px', width:'100%' }}
                 className={`link ${pathname === "/products" ? "active" : ""}`}
                 href="/products"
               >
@@ -69,7 +82,7 @@ const Navbar = () => {
 
               <Link
                 as={NextLink}
-                _hover={{ cursor: "pointer",bg:'#041E42', color:'white',p:'14px',transition:'0.3s', borderRadius:'0px', width:'100%' }}
+                _hover={{ cursor: "pointer",bg:'#041E42', color:'white',p:'14px',transition:'0.1s', borderRadius:'10px', width:'100%' }}
                 className={`link ${pathname === "/orders" ? "active" : ""}`}
                 href="/orders"
               >
@@ -81,7 +94,7 @@ const Navbar = () => {
 
               <Link
                 as={NextLink}
-                _hover={{ cursor: "pointer",bg:'#041E42', color:'white',p:'14px',transition:'0.3s', borderRadius:'0px', width:'100%' }}
+                _hover={{ cursor: "pointer",bg:'#041E42', color:'white',p:'14px',transition:'0.1s', borderRadius:'10px', width:'100%' }}
                 className={`link ${pathname === "/chat" ? "active" : ""}`}
                 href="/chat"
               >
@@ -93,7 +106,7 @@ const Navbar = () => {
 
               <Link
                 as={NextLink}
-                _hover={{ cursor: "pointer",bg:'#041E42', color:'white',p:'14px',transition:'0.3s', borderRadius:'0px', width:'100%' }}
+                _hover={{ cursor: "pointer",bg:'#041E42', color:'white',p:'14px',transition:'0.1s', borderRadius:'10px', width:'100%' }}
                 className={`link ${pathname === "/settings" ? "active" : ""}`}
                 href="/settings"
               >
@@ -102,6 +115,12 @@ const Navbar = () => {
                   <Text fontSize={"l"}>Settings</Text>
                 </Flex>
               </Link>
+
+              {nSession && (
+          <Button bg={'#041E42'} color={'white'} leftIcon={<BiLogOut />} onClick={handleLogout} pos={"absolute"} bottom={10} type="submit">
+            Log Out
+          </Button>
+        )}
             </Flex>
         </GridItem>
       </Grid>

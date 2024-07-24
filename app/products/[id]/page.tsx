@@ -1,290 +1,105 @@
-"use client";
-import React, { useState } from "react";
-import {
-  Flex,
-  Text,
-  Box,
-  Image,
-  Link,
-  Button,
-  Divider,
-  FormControl,
-  FormLabel,
-  Icon,
-  Input,
-  useToast,
-  FormHelperText,
-} from "@chakra-ui/react";
-import { IoIosArrowRoundBack } from "react-icons/io";
-import { useRouter } from "next/navigation";
-import { CreateProduct } from "@/app/api";
-import { ProductType } from "@/Schemas";
+'use client'
+import { Box, Text, Spinner, Flex, Grid, GridItem, Heading, Divider, Card, CardHeader, CardBody, Image, Icon, Button } from '@chakra-ui/react';
+import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+import React from 'react'
+import { IoIosArrowRoundBack } from 'react-icons/io';
 
-const AddProducts = () => {
-  const router = useRouter();
-  const toast = useToast();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
+const ProductDetails = ({params}: { params: { id: string }}) => {
 
-  const handleGoBack = () => {
-    router.back(); // Navigates to the previous page
-  };
+    const id = params.id;
 
-  const [data, setData] = useState<ProductType>({
-    name: "",
-    price: 0,
-    description: "",
-    category: "",
-    dosage: "",
-    image: "",
-    weight: "",
-    expirationDate: "",
-  });
+    const { data: product, isLoading  } = useQuery({queryKey: [`product_${id}`, id], queryFn: async () => {
+      const res = await fetch(`/api/products/${id}`)
+      return res?.ok ? res.json() : []
+      }, ...{enabled:!!id}})
 
-  const handleProductCreate = async (payload: ProductType) => {
-    if (isImageLoading) {
-      toast({
-        title: "Image is still uploading, please wait.",
-        status: "info",
-        isClosable: true,
-      });
-      return;
-    }
+      console.log(product)
 
-    setLoading(true);
-    try {
-      const createdProduct = await CreateProduct(payload);
-      if (createdProduct) {
-        toast({
-          title: "Success",
-          status: "success",
-          isClosable: true,
-        });
-        console.log('created product', createdProduct);
-        router.back();
-      }
-    } catch (e: any) {
-      toast({
-        title: e.message,
-        status: "error",
-        isClosable: true,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+      const router = useRouter()
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, files } = e.target;
-  
-    if (name === "price") {
-      setData((prevData: ProductType) => ({ ...prevData, [name]: parseFloat(value) }));
-    } else if (name === "image" && files && files[0]) {
-      const reader = new FileReader();
-      setIsImageLoading(true);
-      reader.onloadend = () => {
-        const result = reader.result;
-        let base64Data: string | undefined;
-  
-        if (typeof result === "string") {
-          base64Data = result.slice(result.indexOf(',') + 1); 
-        } else if (result instanceof ArrayBuffer) {
-          console.warn("ArrayBuffer detected for image upload. Conversion required.");
-        }
-  
-        if (base64Data) {
-          setData((prevData: ProductType) => ({ ...prevData, image: base64Data }));
-        }
-        setIsImageLoading(false);
+      const handleGoBack = () => {
+        router.back(); // Navigates to the previous page
       };
-      reader.readAsDataURL(files[0]);
-    } else {
-      setData((prevData: ProductType) => ({ ...prevData, [name]: value }));
-    }
-  };
-  
-  
 
+ 
+    
   return (
     <>
-      <Flex ml={10}>
-        <Icon
-          cursor={"pointer"}
-          onClick={handleGoBack}
-          fontSize={"50px"}
-          as={IoIosArrowRoundBack}
-        />
+
+    {isLoading && (
+        <Flex height="100vh" alignItems="center" justifyContent="center">
+        <Spinner size="xl" />
       </Flex>
-      <Flex justify={"center"} bg={"#F9F9F8"} align={"center"} h={"100vh"}>
-        <Flex bg={"#F9F9F8"}>
-          <Flex direction={"column"} p={"30px"}>
-            <Flex p={3} gap={700} bg={"white"} justify={"center"} align={"center"}>
-              <Text>Add New Products</Text>
-              <Flex alignItems={"center"}>
-                <Button p={2} bg={"#05A1F8"} color={"white"} borderRadius={0} onClick={() => handleProductCreate(data)} disabled={loading}>
-                  {loading ? "Creating Product" : "Created"}
-                </Button>
-              </Flex>
-            </Flex>
+      )}
 
-            <Flex mt={5} bg={"white"}>
-              <Flex direction={"column"} p={3}>
-                <Text>Upload Image</Text>
-                <Text color={"#C9C8C8"}>
-                  Upload Captivating images to make your product stand out
-                </Text>
-                <Divider
-                  border={"0.5px solid #000000"}
-                  w={"1000px"}
-                  orientation="horizontal"
-                />
+    {product && (
+        <>
+<Flex alignItems="center" justifyContent="center" minHeight="100vh" p={5}>
+            <Card maxW="600px" w="full" boxShadow="lg" borderRadius="lg">
+              <CardHeader bg="blue.500" color="white" borderTopRadius="lg" p={4}>
+                <Heading size="md">Product Details</Heading>
+              </CardHeader>
+              <CardBody p={6}>
+                <Image src={product.image} alt={product.name} borderRadius="md"  />
+                <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+                  <GridItem colSpan={2}>
+                    <Text fontSize="2xl" fontWeight="bold" mb={4}>{product.name}</Text>
+                    <Divider mb={4} />
+                  </GridItem>
+                  
+                  <GridItem>
+                    <Text fontWeight={900}>Price:</Text>
+                  </GridItem>
+                  <GridItem>
+                    <Text>₵{product.price}</Text>
+                  </GridItem>
 
-                <Flex mt={5} gap={10}>
-                  <Box
-                    bg={"#F9F9F8"}
-                    w={"300px"}
-                    h={"400px"}
-                    justifyContent={"center"}
-                    alignContent={"center"}
-                    _hover={{ cursor: "pointer" }}
-                  >
-                    <Input
-                      id="image"
-                      display={"inline-block"}
-                      border={"none"}
-                      type="file"
-                      name="image"
-                      onChange={handleInputChange}
-                    />
-                  </Box>
+                  <GridItem>
+                    <Text fontWeight={900}>Weight:</Text>
+                  </GridItem>
+                  <GridItem>
+                    <Text>{product.weight}</Text>
+                  </GridItem>
 
-                  <Flex direction={"column"}>
-                    <FormControl w={"full"}>
-                      <FormLabel w={"600px"} fontWeight={"bold"}>
-                        Product Name:
-                      </FormLabel>
-                      <Input
-                        id="name"
-                        variant={"flushed"}
-                        bg={"#F9F9F8"}
-                        borderRadius={0}
-                        type="text"
-                        name="name"
-                        value={data.name}
-                        onChange={handleInputChange}
-                      />
-                    </FormControl>
+                  <GridItem>
+                    <Text fontWeight={900}>Dosage:</Text>
+                  </GridItem>
+                  <GridItem>
+                    <Text>{product.dosage}</Text>
+                  </GridItem>
 
-                    <Flex gap={4} mt={6}>
-                      <FormControl w={"full"}>
-                        <FormLabel fontWeight={"bold"}>Category:</FormLabel>
-                        <Input
-                          id="category"
-                          variant={"flushed"}
-                          bg={"#F9F9F8"}
-                          w={"300px"}
-                          borderRadius={0}
-                          type="text"
-                          name="category"
-                          value={data.category}
-                          onChange={handleInputChange}
-                        />
-                      </FormControl>
+                  <GridItem>
+                    <Text fontWeight={900}>Category:</Text>
+                  </GridItem>
+                  <GridItem>
+                    <Text>{product.category}</Text>
+                  </GridItem>
 
-                      <FormControl w={"full"}>
-                        <FormLabel fontWeight={"bold"}>Dosage</FormLabel>
-                        <Input id="dosage" variant={"flushed"} bg={"#F9F9F8"} w={"300px"} borderRadius={0} type="text"
-                          name="dosage" value={data.dosage} onChange={handleInputChange}/>
-                      </FormControl>
-                    </Flex>
+                  <GridItem>
+                    <Text fontWeight={900}>Expiration Date:</Text>
+                  </GridItem>
+                  <GridItem>
+                    <Text>{product.expirationDate}</Text>
+                  </GridItem>
 
-                    <Flex>
-                      <FormControl mt={6} w={"full"}>
-                        <FormLabel fontWeight={"bold"}>Price:</FormLabel>
-                        <Input
-                          id="price"
-                          variant={"flushed"}
-                          bg={"#F9F9F8"}
-                          w={"300px"}
-                          borderRadius={0}
-                          type="number"
-                          name="price"
-                          value={data.price}
-                          onChange={handleInputChange}
-                        />
-                      </FormControl>
-
-                      <FormControl mt={6} w={"full"}>
-                        <FormLabel fontWeight={"bold"}>Weight:</FormLabel>
-                        <Input
-                          id="weight"
-                          variant={"flushed"}
-                          bg={"#F9F9F8"}
-                          w={"300px"}
-                          placeholder="in kg"
-                          borderRadius={0}
-                          type="number"
-                          name="weight"
-                          value={data.weight}
-                          onChange={handleInputChange}
-                        />
-                      </FormControl>
-                    </Flex>
-
-                    <FormControl mt={6} w={"full"}>
-                      <FormLabel fontWeight={"bold"}>
-                        Expiration Date:
-                      </FormLabel>
-                      <Input
-                        id="expirationDate"
-                        variant={"flushed"}
-                        bg={"#F9F9F8"}
-                        w={"300px"}
-                        type="date"
-                        borderRadius={0}
-                        name="expirationDate"
-                        value={data.expirationDate}
-                        onChange={handleInputChange}
-                      />
-                    </FormControl>
-
-                    <FormControl w={"full"} mt={6}>
-                      <FormLabel w={"600px"} fontWeight={"bold"}>
-                        Description:
-                      </FormLabel>
-                      <Input
-                        id="description"
-                        variant={"flushed"}
-                        bg={"#F9F9F8"}
-                        h={"10vh"}
-                        borderRadius={0}
-                        type="text"
-                        name="description"
-                        value={data.description}
-                        onChange={handleInputChange}
-                      />
-                    </FormControl>
-
-                    <Flex mt={5} justify={"right"} align={"right"}>
-                      <Button
-                        colorScheme="blue"
-                        onClick={() => handleProductCreate(data)}
-                        color={"white"}
-                        type="submit"
-                        disabled={loading}
-                      >
-                        {loading ? "Creating Product" : "Submit"}
-                      </Button>
-                    </Flex>
-                  </Flex>
-                </Flex>
-              </Flex>
-            </Flex>
+                  <GridItem>
+                    <Text fontWeight={900}>Description:</Text>
+                  </GridItem>
+                  <GridItem>
+                    <Text>{product.description}</Text>
+                  </GridItem>
+                </Grid>
+              </CardBody>
+            </Card>
+            <Flex ml={10}>
+      <Button onClick={handleGoBack}>Go back</Button>
+    </Flex>
           </Flex>
-        </Flex>
-      </Flex>
+        </>
+    )}
     </>
-  );
-};
+  )
+}
 
-export default AddProducts;
+export default ProductDetails

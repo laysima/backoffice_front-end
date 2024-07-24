@@ -12,7 +12,7 @@ import {
   Icon,
   InputGroup,
   InputRightElement,
-  Input,
+  Input
 } from "@chakra-ui/react";
 import NextLink from "next/link";
 import Navbar from "../components/Navbar";
@@ -22,14 +22,35 @@ import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { PiHandWaving } from "react-icons/pi";
 import { useState } from "react";
 
+import ReactDOM from "react-dom";
+import { SubmitHandler, useForm } from "react-hook-form";
+
+type Inputs = {
+  example1: string,
+  example2: string,
+  example3: string,
+  example4: string,
+};
+
 const settings = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [show, setShow] = useState(false);
+
+
+  const [show, setShow] = React.useState(false)
+  const handleClickShow = () => setShow(!show)
 
   const handleClick = () => {
     inputRef.current?.click();
   };
+
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<Inputs>();
+  const onSubmit: SubmitHandler<Inputs> = data => console.log(data);
+
+  console.log(watch("example1"))
+  console.log(watch("example2")) 
+  console.log(watch("example3"))  
+  console.log(watch("example4")) 
   return (
     <>
       <Flex bg={"#F9F9F8"} w={"100%"} h={"100vh"}>
@@ -41,14 +62,6 @@ const settings = () => {
             <Flex gap={3} align={"center"} flexGrow={1}>
               <Text>Personal Details</Text>
             </Flex>
-            <Button
-              flexShrink={0}
-              p={2}
-              colorScheme="blue"
-              borderRadius={0}
-            >
-              Save
-            </Button>
           </Flex>
 
           <Flex justify={"center"} bg={"white"} h={'100dvh'} mt={7}>
@@ -96,63 +109,43 @@ const settings = () => {
               </Flex>
 
               <Flex justify={"center"}>
-                <FormControl w={"20rem"}>
-                  <Flex direction={"column"} w={"full"} align={"center"}>
-                    <Flex direction={"column"} align={"start"} w={"full"}>
-                      <FormLabel>Name</FormLabel>
-                      <Input
-                      borderRadius={0}
-                        type="email"
-                      />
-                    </Flex>
-                  </Flex>
+    
+              {/*/////////////////////////////////////// reacthook forms form /////////////////////////////////*/}
 
-                  <Flex mt={5} direction={"column"} w={"full"} align={"center"}>
-                    <Flex direction={"column"} align={"start"} w={"full"}>
-                      <FormLabel>Email</FormLabel>
-                      <Input
-                       borderRadius={0}
-                        type="email"
-                      />
-                    </Flex>
-                  </Flex>
+              <form style={{width:'20rem'}}  onSubmit={handleSubmit(onSubmit)}>
+                <FormLabel>Name</FormLabel>
+                <Input borderRadius={0} {...register("example1", { required: true })} />
+                {errors.example1 && <Text color={'red'}>This field is required</Text>}
 
-                  <Flex mt={5} direction={"column"} w={"full"} align={"center"}>
-                    <Flex direction={"column"} align={"start"} w={"full"}>
-                      <FormLabel>Username</FormLabel>
-                      <Input
-                       borderRadius={0}
-                        type="email"
-                      />
-                    </Flex>
-                  </Flex>
+                <FormLabel mt={5}>Email</FormLabel>            
+                <Input borderRadius={0} {...register("example2", { required: true })} />
+                {errors.example2 && <Text color={'red'}>This field is required</Text>}
 
-                  <Flex mt={5} direction={"column"} w={"full"} align={"center"}>
-                    <Flex direction={"column"} align={"start"} w={"full"}>
-                      <FormLabel>Password</FormLabel>
-                      <InputGroup size="md">
-                        <Input
-                         borderRadius={0}
-                          pr="4.5rem"
-                          type={show ? "text" : "password"}
-                        />
-                        <InputRightElement width="4.5rem">
-                          <button
-                            style={{
-                              height: "1.75rem",
-                              fontSize: "m",
-                              backgroundColor: "none",
-                            }}
-                            onClick={handleClick}
-                          >
-                            {show ? <BsEye /> : <BsEyeSlash />}
-                          </button>
-                        </InputRightElement>
-                      </InputGroup>
-                    </Flex>
-                  </Flex>
-           
-                </FormControl>
+                <FormLabel mt={5}>Username</FormLabel>            
+                <Input borderRadius={0} {...register("example3", { required: true })} />
+                {errors.example3 && <Text color={'red'}>This field is required</Text>}
+
+                <FormLabel mt={5}>Password</FormLabel>            
+                    <InputGroup size='md'>
+                    <Input borderRadius={0}
+                      pr='4.5rem'
+                      {...register("example4", { required: true })} 
+                      type={show ? 'text' : 'password'}
+                      placeholder='Enter password'
+                    />
+                    <InputRightElement width='4.5rem'>
+                      <Button h='1.75rem' size='sm' onClick={handleClickShow}>
+                        {show ? 'Hide' : 'Show'}
+                      </Button>
+                    </InputRightElement>
+                  </InputGroup>
+                {errors.example4 && <Text color={'red'}>This field is required</Text>}
+
+             <Flex pt={8}>
+                <Button colorScheme="blue" cursor={"pointer"} type="submit">Submit</Button>
+              </Flex>
+              </form>
+              
               </Flex>
             </Flex>
           </Flex>

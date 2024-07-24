@@ -3,7 +3,7 @@ import React from "react";
 import Navbar from "../components/Navbar";
 import "../globals.css";
 import { Flex, Box, Text, Image, Grid, GridItem, Icon, Button, StatGroup, Stat, StatLabel, StatNumber, StatArrow, StatHelpText } from "@chakra-ui/react";
-import { MdOutlineListAlt } from "react-icons/md";
+import { MdOutlineListAlt, MdSearch } from "react-icons/md";
 import { TbShoppingBagX } from "react-icons/tb";
 import { TiMessages } from "react-icons/ti";
 import WeekChart from "../components/WeekChart";
@@ -12,6 +12,7 @@ import { deleteCookie, getCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
 import { BiLogOut } from "react-icons/bi";
 import LineChart from "../components/LineChart";
+import { IoPersonCircleOutline } from "react-icons/io5";
 import DataTableDemo from "../components/DataTableDemo";
 
 
@@ -39,17 +40,18 @@ const dashboard = () => {
           <Text>Dashboard</Text>
         </Flex>
 
-        <Button flexShrink={0} p={2} colorScheme="blue" borderRadius={0}>
-          <Text color={"white"} fontWeight={500} ml={2} fontSize={"17px"}>
+        <Flex align={"center"}>
+          <Icon as={IoPersonCircleOutline} boxSize={10} />
+          <Text flexShrink={0} fontWeight={500} ml={2} fontSize={"17px"}>
             {nSession ? nSession?.username : "/"}
           </Text>
-        </Button>
+        </Flex>
 
-        {nSession && (
+        {/* {nSession && (
           <Button colorScheme="red" leftIcon={<BiLogOut />} onClick={handleLogout}  type="submit">
             Log Out
           </Button>
-        )}
+        )} */}
       </Flex>
 
       <Grid
@@ -73,9 +75,6 @@ const dashboard = () => {
         <GridItem  border={'0.5px solid #C5C5C5'} h={130} p={3} bg={"white"} color={"black"} borderRadius={5} area={"header1"}
           justifyContent={"center"} alignContent={"center"}>
           <Flex alignItems={"center"}>
-            <Flex p={3}>
-              <Icon fontSize={"25px"} color={"green"} as={MdOutlineListAlt} />
-            </Flex>
             <Flex ml={2} direction={"column"}>
               <Text fontWeight={500} fontSize={"xl"}>
                 Orders
@@ -140,9 +139,6 @@ const dashboard = () => {
         <GridItem border={'0.5px solid #C5C5C5'} p={3} bg={"white"} color={"black"} borderRadius={5} area={"nav"} justifyContent={"center"}
           alignContent={"center"}>
           <Flex alignItems={"center"}>
-            <Flex p={3}>
-              <Icon fontSize={"25px"} color={"red"} as={TbShoppingBagX} />
-            </Flex>
             <Flex ml={2} direction={"column"}>
               <Text fontWeight={500} fontSize={"xl"}>
                 Out Of Stock
@@ -165,9 +161,6 @@ const dashboard = () => {
         <GridItem border={'0.5px solid #C5C5C5'} p={3} bg={"white"} color={"black"} borderRadius={5} area={"subNav"} justifyContent={"center"}
           alignContent={"center"}>
           <Flex alignItems={"center"}>
-            <Flex p={3}>
-              <Icon fontSize={"25px"} color={"#9747FF"} as={TiMessages} />
-            </Flex>
             <Flex ml={2} direction={"column"}>
               <Text fontWeight={500} fontSize={"xl"}>
                 Chats
@@ -211,10 +204,7 @@ const dashboard = () => {
 <GridItem border={'0.5px solid #C5C5C5'} p={3} bg={"white"} color={"black"} borderRadius={5} area={"subNavi"} justifyContent={"center"}
           alignContent={"center"}>
           <Flex alignItems={"center"}>
-            <Flex p={3}>
-              <Icon fontSize={"25px"} color={"green"} as={MdOutlineListAlt} />
-            </Flex>
-            <Flex ml={2} direction={"column"}>
+            <Flex direction={"column"}>
               <Text fontWeight={500} fontSize={"xl"}>
                 Store Review
               </Text>

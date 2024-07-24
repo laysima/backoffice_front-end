@@ -20,7 +20,7 @@ const WeekChart = () => {
               borderWidth: 2,
               fill: {
                 target: 'origin',
-                above: 'rgba(255, 255, 255, 1)' // Fill color with opacity 20%
+                above: 'rgba(255, 255, 255, 1)',
               }
             }]
           },

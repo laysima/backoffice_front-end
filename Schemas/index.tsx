@@ -28,6 +28,18 @@ export const EditProductSchema = z.object({
   image: z.string({ required_error: "Required" }),
 });
 
+export const AddProductSchema = z.object({
+  category: z.string(),
+  name: z.string(),
+  weight: z.string(),
+  dosage: z.string(),
+  expirationDate: z.string(),
+  description: z.string().optional(),
+  price: z.number(),
+  image: z.string(),
+});
+
 export type ProductType = z.infer<typeof ProductSchema>;
 export type LoginType = z.infer<typeof LoginSchema>
 export type EditType = z.infer<typeof EditProductSchema>
+export type AddType = z.infer<typeof AddProductSchema>

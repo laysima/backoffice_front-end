@@ -1,9 +1,11 @@
 'use client'
-import { EditType } from '@/Schemas'
+import { EditProductSchema, EditType } from '@/Schemas'
 import { Button, Divider, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure, useToast } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import React, { useRef, useState } from 'react'
 import { EditProduct } from '../api'
+import { Controller, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 const ProductModal = () => {
 
@@ -22,6 +24,13 @@ const [loading, setLoading] = useState(false);
 const [currentProduct, setCurrentProduct] = useState(false)
 
 const [isImageLoading, setIsImageLoading] = useState(false);
+
+const { control, handleSubmit, formState: { errors },} = useForm<EditType>
+(
+  {
+    resolver:zodResolver(EditProductSchema)
+  }
+)
 
 const handleGoBack = () => {
   router.back(); // Navigates to the previous page
@@ -103,11 +112,12 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   
   return (
     <>
-    <Button onClick={onOpen}>Edit</Button>
+
+<FormControl>
+    <Button onClick={onOpen} colorScheme='green'>Edit</Button>
    
     <Modal initialFocusRef={initialRef} finalFocusRef={finalRef}
-      isOpen={isOpen}onClose={onClose}
-    >
+      isOpen={isOpen}onClose={onClose}>
       <ModalOverlay />
       <ModalContent overflowY="scroll" h={'80dvh'}>
         <ModalHeader>Edit Drug Info</ModalHeader>
@@ -122,15 +132,7 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <Input id="image" border={0} borderRadius={0}type="file" name="image" onChange={handleInputChange}
           />
         </FormControl>
-
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-            Product Name:
-          </FormLabel>
-          <Input id="name" value={data.name} variant={"flushed"} bg={"#F9F9F8"} borderRadius={0}type="text" name="name" onChange={handleInputChange}
-          />
-        </FormControl>
-
+            
         <FormControl w={"full"} mt={6}>
           <FormLabel w={"600px"} fontWeight={"bold"}>
             Price:
@@ -193,6 +195,7 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         </ModalFooter>
       </ModalContent>
     </Modal>
+</FormControl>
   </>
   )
 }
