@@ -1,5 +1,5 @@
 import axios from "axios";
-import { LoginType, ProductType } from "@/Schemas";
+import { EditType, LoginType, ProductType } from "@/Schemas";
 import { getCookie } from "cookies-next";
 
 const client = axios.create({
@@ -24,10 +24,10 @@ export const CreateProduct = async ({category, name, weight, dosage, expirationD
   }
 };
 
-export const EditProduct = async ({category, name, weight, dosage, expirationDate, description, price,image}: ProductType) => {
+export const EditProduct = async ({newCategory, newName,oldName, oldCategory, weight, dosage, expirationDate, description, price,image}: EditType) => {
   const URL = "/v1/product/edit";
   try {
-    const response = await client.post(URL, { category, name, weight, dosage, expirationDate, description, price,image}, {
+    const response = await client.post(URL, {newCategory, newName,oldName, oldCategory, weight, dosage, expirationDate, description, price,image}, {
       headers: {
         Authorization: nSession.token
       }

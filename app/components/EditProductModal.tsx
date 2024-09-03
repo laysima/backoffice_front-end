@@ -38,10 +38,12 @@ const handleGoBack = () => {
 
 
 const [data, setData] = useState<EditType>({
-  name: "",
+  oldCategory:'',
+  oldName: "",
+  newCategory:'',
+  newName:'',
   price: 0,
   description: "",
-  category: "",
   dosage: "",
   image: "",
   weight: "",
@@ -129,59 +131,92 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <FormLabel w={"600px"} fontWeight={"bold"}>
             Upload image:
           </FormLabel>
-          <Input id="image" border={0} borderRadius={0}type="file" name="image" onChange={handleInputChange}
-          />
-        </FormControl>
-            
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-            Price:
-          </FormLabel>
-          <Input id="price" variant={"flushed"} value={data.price} bg={"#F9F9F8"} borderRadius={0}type="text" name="price" onChange={handleInputChange}
-          />
-        </FormControl>
-
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-            Weight:
-          </FormLabel>
-          <Input id="weight" variant={"flushed"} value={data.weight} bg={"#F9F9F8"} borderRadius={0}type="number" name="weight" onChange={handleInputChange}
+          <Input 
+          id="image" 
+          border={0} 
+          borderRadius={0}
+          type="file" 
+          name="image" 
+          onChange={handleInputChange}
+          accept={"image/*"}
           />
         </FormControl>
 
         <FormControl w={"full"} mt={6}>
           <FormLabel w={"600px"} fontWeight={"bold"}>
-            Dosage:
+            New Category:
           </FormLabel>
-          <Input id="dosage" variant={"flushed"} value={data.dosage} bg={"#F9F9F8"} borderRadius={0}type="text" name="dosage" onChange={handleInputChange}
+          <Input id="name" variant={"flushed"} value={data.newCategory} bg={"#F9F9F8"} borderRadius={0}type="text" name="newCategory" onChange={handleInputChange}
+          />
+        </FormControl>
+
+        <FormControl w={"full"} mt={6}>
+          <FormLabel w={"600px"} fontWeight={"bold"}>
+            New Name:
+          </FormLabel>
+          <Input id="name" variant={"flushed"} value={data.newName} bg={"#F9F9F8"} borderRadius={0}type="text" name="newName" onChange={handleInputChange}
+          />
+        </FormControl>
+
+        <FormControl w={"full"} mt={6}>
+          <FormLabel w={"600px"} fontWeight={"bold"}>
+            Old Name:
+          </FormLabel>
+          <Input id="name" variant={"flushed"} value={data.oldName} bg={"#F9F9F8"} borderRadius={0}type="text" name="oldName" onChange={handleInputChange}
+          />
+        </FormControl>
+
+        <FormControl w={"full"} mt={6}>
+          <FormLabel w={"600px"} fontWeight={"bold"}>
+            Old Category:
+          </FormLabel>
+          <Input id="name" variant={"flushed"} value={data.oldCategory} bg={"#F9F9F8"} borderRadius={0}type="text" name="oldCategory" onChange={handleInputChange}
+          />
+        </FormControl>
+
+        <FormControl w={"full"} mt={6}>
+          <FormLabel w={"600px"} fontWeight={"bold"}>
+          Price:
+          </FormLabel>
+          <Input id="expirationDate" variant={"flushed"} value={data.price} bg={"#F9F9F8"} borderRadius={0} type="number" name="price" onChange={handleInputChange}
+          />
+        </FormControl>
+
+        <FormControl w={"full"} mt={6}>
+          <FormLabel w={"600px"} fontWeight={"bold"}>
+          Weight:
+          </FormLabel>
+          <Input id="price" variant={"flushed"} value={data.weight} bg={"#F9F9F8"} borderRadius={0}type="text" name="weight" onChange={handleInputChange}
+          />
+        </FormControl>
+
+        <FormControl w={"full"} mt={6}>
+          <FormLabel w={"600px"} fontWeight={"bold"}>
+          Dosage:
+          </FormLabel>
+          <Input id="weight" variant={"flushed"} value={data.dosage} bg={"#F9F9F8"} borderRadius={0} type="text" name="dosage" onChange={handleInputChange}
+          />
+        </FormControl>
+
+        <FormControl w={"full"} mt={6}>
+          <FormLabel w={"600px"} fontWeight={"bold"}>
+          ExpirationDate:
+          </FormLabel>
+          <Input id="dosage" variant={"flushed"} value={data.expirationDate} bg={"#F9F9F8"} borderRadius={0}type="date" name="expirationDate" onChange={handleInputChange}
           />
         </FormControl>
 
 
         <FormControl w={"full"} mt={6}>
           <FormLabel w={"600px"} fontWeight={"bold"}>
-            Category:
+          Description:
           </FormLabel>
-          <Input id="category" variant={"flushed"} value={data.category}  bg={"#F9F9F8"} borderRadius={0}type="text" name="category" onChange={handleInputChange} 
+          <Input id="category" variant={"flushed"} value={data.description}  bg={"#F9F9F8"} borderRadius={0}type="text" name="description" onChange={handleInputChange} 
           />
         </FormControl>
 
 
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-            Expiration Date:
-          </FormLabel>
-          <Input id="expirationDate" variant={"flushed"} value={data.expirationDate} bg={"#F9F9F8"} borderRadius={0} type="date" name="expirationDate" onChange={handleInputChange}
-          />
-        </FormControl>
 
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-            Description:
-          </FormLabel>
-          <Input id="description" variant={"flushed"} value={data.description} bg={"#F9F9F8"} borderRadius={0} type="text" name="description" onChange={handleInputChange}
-          />
-        </FormControl>
 
 
 

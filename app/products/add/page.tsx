@@ -14,6 +14,7 @@ import {
   Input,
   useToast,
   FormHelperText,
+  Spinner,
 } from "@chakra-ui/react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { useRouter } from "next/navigation";
@@ -23,8 +24,12 @@ import { AddProductSchema, AddType, ProductType } from "@/Schemas";
 
 const AddProducts = () => {
   const router = useRouter();
+
   const toast = useToast();
+
   const [loading, setLoading] = useState<boolean>(false);
+
+  
   const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
 
 
@@ -90,11 +95,10 @@ const AddProducts = () => {
   
         if (typeof result === "string") {
           base64Data = result.slice(result.indexOf(',') + 1); 
-        } else if (result instanceof ArrayBuffer) {
-          console.warn("ArrayBuffer detected for image upload. Conversion required.");
         }
   
         if (base64Data) {
+          // Update the state with the base64 image URL
           setData((prevData: ProductType) => ({ ...prevData, image: base64Data }));
         }
         setIsImageLoading(false);
@@ -104,6 +108,7 @@ const AddProducts = () => {
       setData((prevData: ProductType) => ({ ...prevData, [name]: value }));
     }
   };
+  
   
   
 
@@ -138,23 +143,47 @@ const AddProducts = () => {
                 />
     
                 <Flex mt={5} gap={10}>
-                  <Box
-                    bg={"#F9F9F8"}
-                    w={"300px"}
-                    h={"500px"}
-                    justifyContent={"center"}
-                    alignContent={"center"}
-                    _hover={{ cursor: "pointer" }}
-                  >
-                    <Input
-                      id="image"
-                      display={"inline-block"}
-                      border={"none"}
-                      type="file"
-                      name="image"
-                      onChange={handleInputChange}
+                <Box
+                  bg={"#F9F9F8"}
+                  w={"300px"}
+                  h={"500px"}
+                  justifyContent={"center"}
+                  alignItems={"center"}
+                  display={"flex"}
+                  _hover={{ cursor: "pointer" }}
+                  position={"relative"}
+                >
+                  <Input
+                    id="image"
+                    display={"none"}
+                    border={"none"}
+                    type="file"
+                    name="image"
+                    onChange={handleInputChange}
+                    accept={"image/*"}
+                  />
+                  {isImageLoading ? (
+                    <Spinner />
+                  ) : data.image ? (
+                    <Image
+                      src={`data:image/jpeg;base64,${data.image}`}
+                      alt="Uploaded Image"
+                      objectFit="cover"
+                      w={"100%"}
+                      h={"100%"}
                     />
-                  </Box>
+                  ) : (
+                    <Box as="label" htmlFor="image">
+                      <Flex
+                        cursor={"pointer"}
+                        justifyContent="center"
+                        alignItems="center"
+                      >
+                        Click to upload image
+                      </Flex>
+                    </Box>
+                  )}
+                </Box>
                   <Flex direction={"column"}>
                     <FormControl w={"full"}>
                       <FormLabel w={"600px"} fontWeight={"bold"}>
@@ -203,7 +232,7 @@ const AddProducts = () => {
                           variant={"flushed"}
                           bg={"#F9F9F8"}
                           w={"300px"}
-                          borderRadius={0}
+                          borderRadius={0} 
                           type="number"
                           name="price"
                           value={data.price}

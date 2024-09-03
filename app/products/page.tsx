@@ -1,5 +1,5 @@
-"use client";
-import React, { useState, useEffect } from "react";
+"use client"
+import React, { useState, useEffect, RefObject } from "react";
 import Navbar from "../components/Navbar";
 import "../globals.css";
 import {
@@ -15,7 +15,13 @@ import {
   Grid,
   VStack,
   Card, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure,
-  Spinner
+  Spinner,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogBody,
+  AlertDialogFooter
 } from "@chakra-ui/react";
 import PaginationControls from "../components/PaginationControls";
 import { DeleteProduct, GetProducts } from "@/app/api";
@@ -60,9 +66,11 @@ export default function GetAllProducts({
 
   const [deletingProduct, setDeletingProduct] = useState<string | null>(null);
 
+  const [overlay, setOverlay] = React.useState(<OverlayOne />)
+
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  const [overlay, setOverlay] = React.useState(<OverlayOne />)
+  const cancelRef = React.useRef<any>()
   
 
   const toast = useToast();
@@ -192,12 +200,12 @@ export default function GetAllProducts({
                 </Button> */}
                 <ProductModal/>  
 
-                <Button colorScheme="red" onClick={() => {setOverlay(<OverlayOne />) 
+                {/* <Button colorScheme="red" onClick={() => {setOverlay(<OverlayOne />) 
                     onOpen()}}>
                   Delete
-                </Button>
+                </Button> */}
     
-        <Modal isCentered isOpen={isOpen} onClose={onClose}>
+        {/* <Modal isCentered isOpen={isOpen} onClose={onClose}>
           {overlay}
           <ModalContent>
             <ModalHeader>Are you sure you want to delete</ModalHeader>
@@ -217,7 +225,46 @@ export default function GetAllProducts({
                 </Button>
             </ModalFooter>
           </ModalContent>
-        </Modal>
+        </Modal> */}
+
+<Button colorScheme='red' onClick={onOpen}>
+        Delete
+      </Button>
+
+      <AlertDialog
+        isOpen={isOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+              Delete Customer
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Are you sure? You can&apos;t undo this action afterwards.
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                  colorScheme='red' ml={3}
+                  onClick={() => {
+                    deleteProduct(product.name, product.category)
+                  }}
+                  isLoading={deletingProduct === product.name}
+                  mt="auto"
+                  alignSelf="center"
+                >
+                  {deletingProduct === product.name ? "Deleting..." : "Delete"}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
                 </Flex>
               </Flex>
             </Box>

@@ -16,7 +16,7 @@ import { IoPersonCircleOutline } from "react-icons/io5";
 import DataTableDemo from "../components/DataTableDemo";
 
 
-const dashboard = () => {
+const Dashboard = () => {
   
   const router = useRouter();
 
@@ -72,7 +72,7 @@ const dashboard = () => {
         gap="3"
         color="blackAlpha.700"
       >
-        <GridItem  border={'0.5px solid #C5C5C5'} h={130} p={3} bg={"white"} color={"black"} borderRadius={5} area={"header1"}
+        <GridItem  border={'0.5px solid #C5C5C5'} p={3} bg={"white"} color={"black"} borderRadius={5} area={"header1"}
           justifyContent={"center"} alignContent={"center"}>
           <Flex alignItems={"center"}>
             <Flex ml={2} direction={"column"}>
@@ -236,4 +236,4 @@ const dashboard = () => {
   );
 };
 
-export default dashboard;
+export default Dashboard;
