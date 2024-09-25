@@ -1,15 +1,25 @@
 'use client'
 import { EditProductSchema, EditType } from '@/Schemas'
-import { Button, Divider, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure, useToast } from '@chakra-ui/react'
+import {
+  Button, Flex, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton,
+  ModalContent, ModalFooter, ModalHeader, ModalOverlay, useToast, VStack, HStack,
+  Box, Image, Textarea, IconButton
+} from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import React, { useRef, useState } from 'react'
 import { EditProduct } from '../api'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { FiUpload } from 'react-icons/fi'
 
-const ProductModal = () => {
+type ProductModalProps = {
+  product: any,
+  isOpen: boolean
+  onOpen: () => void
+  onClose: () => void
+  }
 
-const { isOpen, onOpen, onClose } = useDisclosure()
+const ProductModal = ({ product, isOpen, onOpen, onClose }: ProductModalProps) => {
 
 const initialRef = useRef(null)
 
@@ -37,20 +47,11 @@ const handleGoBack = () => {
 };
 
 
-const [data, setData] = useState<EditType>({
-  oldCategory:'',
-  oldName: "",
-  newCategory:'',
-  newName:'',
-  price: 0,
-  description: "",
-  dosage: "",
-  image: "",
-  weight: "",
-  expirationDate: "",
-});
+const [data, setData] = useState(product);
 
-const handleProductEdit = async (payload: EditType) => {
+console.log(data)
+
+const handleProductEdit = async (payload: any) => {
   if (isImageLoading) {
     toast({
       title: "Image is still uploading, please wait.",
@@ -62,7 +63,8 @@ const handleProductEdit = async (payload: EditType) => {
 
   setLoading(true);
   try {
-    const createdProduct = await EditProduct(payload);
+    console.log({...payload, oldName:payload.name, oldCategory:payload.category})
+    const createdProduct = await EditProduct({...payload, oldName:payload.name, oldCategory:payload.category});
     if (createdProduct) {
       toast({
         title: "Success",
@@ -70,7 +72,8 @@ const handleProductEdit = async (payload: EditType) => {
         isClosable: true,
       });
       console.log('created product', createdProduct);
-      router.back();
+      onClose(); 
+      window.location.reload()
     }
   } catch (e: any) {
     toast({
@@ -83,8 +86,8 @@ const handleProductEdit = async (payload: EditType) => {
   }
 };
 
-const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const { name, value, files } = e.target;
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const { name, value, files } = e.target as HTMLInputElement;
 
   if (name === "price") {
     setData((prevData: EditType) => ({ ...prevData, [name]: parseFloat(value) }));
@@ -116,117 +119,111 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     <>
 
 <FormControl>
-    <Button onClick={onOpen} colorScheme='green'>Edit</Button>
+    {/* <Button onClick={onOpen} colorScheme='green'>Edit</Button> */}
    
     <Modal initialFocusRef={initialRef} finalFocusRef={finalRef}
-      isOpen={isOpen}onClose={onClose}>
+      isOpen={isOpen} onClose={onClose} size="4xl" scrollBehavior="inside">
       <ModalOverlay />
-      <ModalContent overflowY="scroll" h={'80dvh'}>
-        <ModalHeader>Edit Drug Info</ModalHeader>
-        <Divider border={'0.5px solid black'}/>
-        <ModalCloseButton />
-        <ModalBody pb={6}>
-
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-            Upload image:
-          </FormLabel>
-          <Input 
-          id="image" 
-          border={0} 
-          borderRadius={0}
-          type="file" 
-          name="image" 
-          onChange={handleInputChange}
-          accept={"image/*"}
-          />
-        </FormControl>
-
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-            New Category:
-          </FormLabel>
-          <Input id="name" variant={"flushed"} value={data.newCategory} bg={"#F9F9F8"} borderRadius={0}type="text" name="newCategory" onChange={handleInputChange}
-          />
-        </FormControl>
-
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-            New Name:
-          </FormLabel>
-          <Input id="name" variant={"flushed"} value={data.newName} bg={"#F9F9F8"} borderRadius={0}type="text" name="newName" onChange={handleInputChange}
-          />
-        </FormControl>
-
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-            Old Name:
-          </FormLabel>
-          <Input id="name" variant={"flushed"} value={data.oldName} bg={"#F9F9F8"} borderRadius={0}type="text" name="oldName" onChange={handleInputChange}
-          />
-        </FormControl>
-
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-            Old Category:
-          </FormLabel>
-          <Input id="name" variant={"flushed"} value={data.oldCategory} bg={"#F9F9F8"} borderRadius={0}type="text" name="oldCategory" onChange={handleInputChange}
-          />
-        </FormControl>
-
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-          Price:
-          </FormLabel>
-          <Input id="expirationDate" variant={"flushed"} value={data.price} bg={"#F9F9F8"} borderRadius={0} type="number" name="price" onChange={handleInputChange}
-          />
-        </FormControl>
-
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-          Weight:
-          </FormLabel>
-          <Input id="price" variant={"flushed"} value={data.weight} bg={"#F9F9F8"} borderRadius={0}type="text" name="weight" onChange={handleInputChange}
-          />
-        </FormControl>
-
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-          Dosage:
-          </FormLabel>
-          <Input id="weight" variant={"flushed"} value={data.dosage} bg={"#F9F9F8"} borderRadius={0} type="text" name="dosage" onChange={handleInputChange}
-          />
-        </FormControl>
-
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-          ExpirationDate:
-          </FormLabel>
-          <Input id="dosage" variant={"flushed"} value={data.expirationDate} bg={"#F9F9F8"} borderRadius={0}type="date" name="expirationDate" onChange={handleInputChange}
-          />
-        </FormControl>
-
-
-        <FormControl w={"full"} mt={6}>
-          <FormLabel w={"600px"} fontWeight={"bold"}>
-          Description:
-          </FormLabel>
-          <Input id="category" variant={"flushed"} value={data.description}  bg={"#F9F9F8"} borderRadius={0}type="text" name="description" onChange={handleInputChange} 
-          />
-        </FormControl>
-
-
-
-
-
-
+      <ModalContent maxWidth="900px">
+        <ModalHeader bg="blue.500" color="white" borderTopRadius="md">Edit Drug Info</ModalHeader>
+        <ModalCloseButton color="white" />
+        <ModalBody py={6}>
+          <HStack align="flex-start" spacing={8}>
+            <VStack spacing={6} flex={1}>
+              <Box
+                borderWidth={2}
+                borderStyle="dashed"
+                borderColor="gray.300"
+                borderRadius="md"
+                p={4}
+                w="full"
+                textAlign="center"
+                position="relative"
+                height="200px"
+              >
+                {data.image ? (
+                  <Image src={`data:image/jpeg;base64,${data.image}`} alt="Product" objectFit="cover" w="full" h="full" />
+                ) : (
+                  <VStack justify="center" h="full">
+                    <FiUpload size="40px" color="gray.400" />
+                    <FormLabel htmlFor="image" mb={0} cursor="pointer">
+                      Upload Image
+                    </FormLabel>
+                  </VStack>
+                )}
+                <Input
+                  id="image"
+                  type="file"
+                  name="image"
+                  onChange={handleInputChange}
+                  accept="image/*"
+                  opacity={0}
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  w="full"
+                  h="full"
+                  cursor="pointer"
+                />
+              </Box>
+              <FormControl>
+                <FormLabel fontWeight="bold">Description:</FormLabel>
+                <Textarea
+                  name="description"
+                  value={data.description}
+                  onChange={handleInputChange}
+                  rows={4}
+                  resize="vertical"
+                />
+              </FormControl>
+            </VStack>
+            <VStack spacing={4} flex={1}>
+              <HStack w="full" spacing={4}>
+                <FormControl flex={1}>
+                  <FormLabel fontWeight="bold">New Name:</FormLabel>
+                  <Input name="newName" value={data.newName} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl flex={1}>
+                  <FormLabel fontWeight="bold">New Category:</FormLabel>
+                  <Input name="newCategory" value={data.newCategory} onChange={handleInputChange} />
+                </FormControl>
+              </HStack>
+              <HStack w="full" spacing={4}>
+                <FormControl flex={1}>
+                  <FormLabel fontWeight="bold">Price:</FormLabel>
+                  <Input name="price" type="number" value={data.price} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl flex={1}>
+                  <FormLabel fontWeight="bold">Weight:</FormLabel>
+                  <Input name="weight" value={data.weight} onChange={handleInputChange} />
+                </FormControl>
+              </HStack>
+              <HStack w="full" spacing={4}>
+                <FormControl flex={1}>
+                  <FormLabel fontWeight="bold">Dosage:</FormLabel>
+                  <Input name="dosage" value={data.dosage} onChange={handleInputChange} />
+                </FormControl>
+                <FormControl flex={1}>
+                  <FormLabel fontWeight="bold">Expiration Date:</FormLabel>
+                  <Input name="expirationDate" type="date" value={data.expirationDate} onChange={handleInputChange} />
+                </FormControl>
+              </HStack>
+              <FormControl>
+                <FormLabel fontWeight="bold">Old Name:</FormLabel>
+                <Input name="oldName" value={data.name} isReadOnly bg="gray.100" />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontWeight="bold">Old Category:</FormLabel>
+                <Input name="oldCategory" value={data.category} isReadOnly bg="gray.100" />
+              </FormControl>
+            </VStack>
+          </HStack>
         </ModalBody>
-
-        <ModalFooter>
-          <Button colorScheme='blue' mr={3} type='submit' onClick={() => handleProductEdit(data)} isLoading={loading} >
-          {loading? 'Saving.....':  "Save"}
+        <ModalFooter bg="gray.50" borderBottomRadius="md">
+          <Button colorScheme="blue" mr={3} onClick={() => handleProductEdit(data)} isLoading={loading}>
+            {loading ? 'Saving...' : 'Save Changes'}
           </Button>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={onClose} variant="outline">Cancel</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

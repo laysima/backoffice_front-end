@@ -1,158 +1,185 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useState, useRef } from "react";
 import {
   Flex,
   Text,
-  Link,
   Button,
   Box,
   FormControl,
   FormLabel,
-  FormHelperText,
+  Input,
+  VStack,
+  HStack,
   Icon,
+  useToast,
+  Avatar,
+  AvatarBadge,
   InputGroup,
   InputRightElement,
-  Input
 } from "@chakra-ui/react";
-import NextLink from "next/link";
 import Navbar from "../components/Navbar";
-import { GoPerson } from "react-icons/go";
+import { IoPersonCircleOutline } from "react-icons/io5";
 import { RiEditLine } from "react-icons/ri";
-import { BsEye, BsEyeSlash } from "react-icons/bs";
-import { PiHandWaving } from "react-icons/pi";
-import { useState } from "react";
-
-import ReactDOM from "react-dom";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { motion } from "framer-motion";
+import { getCookie } from "cookies-next";
 
 type Inputs = {
-  example1: string,
-  example2: string,
-  example3: string,
-  example4: string,
+  name: string;
+  email: string;
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+  avatar: FileList;
 };
 
-const settings = () => {
-  const inputRef = useRef<HTMLInputElement>(null);
+const Settings = () => {
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const toast = useToast();
+
+  const { register, handleSubmit, formState: { errors }, watch } = useForm<Inputs>();
+
+  const session = getCookie("session");
+  
+  const nSession = session && JSON.parse(session);
+
+  function formatName(name: string) {
+    const nameParts = name.split(' ');
+    const firstName = nameParts[0];
+    return firstName;
+  }
 
 
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    console.log(data);
 
-  const [show, setShow] = React.useState(false)
-  const handleClickShow = () => setShow(!show)
-
-  const handleClick = () => {
-    inputRef.current?.click();
+    if (data.avatar && data.avatar[0]) {
+      const file = data.avatar[0];
+      setAvatarUrl(URL.createObjectURL(file));
+    }
+    toast({
+      title: "Settings updated.",
+      description: "Your changes have been saved successfully.",
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
   };
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<Inputs>();
-  const onSubmit: SubmitHandler<Inputs> = data => console.log(data);
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
 
-  console.log(watch("example1"))
-  console.log(watch("example2")) 
-  console.log(watch("example3"))  
-  console.log(watch("example4")) 
   return (
-    <>
-      <Flex bg={"#F9F9F8"} w={"100%"} h={"100vh"}>
-        <Flex>
-          <Navbar />
-        </Flex>
-        <Flex direction={"column"} p={"30px"} w={"100%"}>
-          <Flex p={3} bg={"white"}  justify={"center"} align={"center"}>
-            <Flex gap={3} align={"center"} flexGrow={1}>
-              <Text>Personal Details</Text>
+    <Flex bg="#F0F4F8" w="100%" h="100dvh">
+      <Flex>
+        <Navbar />
+      </Flex>
+      <Flex direction="column" p="30px" w="100%" overflowY="scroll" h="100dvh">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Flex p={4} bg="white" justify="space-between" align="center" borderRadius="lg" boxShadow="sm">
+            <Text fontSize="2xl" fontWeight="bold">Settings</Text>
+            <Flex align="center">
+              <Icon as={IoPersonCircleOutline} boxSize={10} color="blue.500" />
+              <Text fontWeight={500} ml={2} fontSize="17px">
+                {nSession ? formatName(nSession?.name) : "/"}
+              </Text>
             </Flex>
           </Flex>
+        </motion.div>
 
-          <Flex justify={"center"} bg={"white"} h={'100dvh'} mt={7}>
-            <Flex direction={"column"}>
-              <Flex justify={"center"}>
-                <Flex>
-                  <Box width={"full"} objectFit={"cover"} mt={5}>
-                    <Icon
-                      as={GoPerson}
-                      p={3}
-                      borderRadius={"full"}
-                      fontSize={"80px"}
-                      bg={'#EEEEEE'}
+        <Box mt={8} bg="white" p={6} borderRadius="lg" boxShadow="md">
+          <VStack spacing={6} align="stretch">
+            <HStack justify="center">
+              <Box position="relative" onClick={handleAvatarClick} cursor="pointer">
+                <Avatar size="xl" name="John Doe" src={avatarUrl || "/path-to-default-avatar.jpg"}>
+                  <AvatarBadge
+                    as={Icon}
+                    boxSize="1.25em"
+                    rounded="full"
+                    top="-10px"
+                    aria-label="Upload Image"
+                  >
+                    <RiEditLine />
+                  </AvatarBadge>
+                </Avatar>
+              </Box>
+            </HStack>
+
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <input
+                type="file"
+                {...register("avatar")}
+                accept="image/*"
+                style={{ display: "none" }}
+                ref={fileInputRef}
+              />
+              <VStack spacing={4} align="stretch">
+                <FormControl>
+                  <FormLabel>Name</FormLabel>
+                  <Input {...register("name", { required: "Name is required" })} />
+                  {errors.name && <Text color="red.500">{errors.name.message}</Text>}
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Email</FormLabel>
+                  <Input {...register("email", { required: "Email is required", pattern: /^\S+@\S+$/i })} />
+                  {errors.email && <Text color="red.500">{errors.email.message}</Text>}
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Current Password</FormLabel>
+                  <Input type="password" {...register("currentPassword", { required: "Current password is required" })} />
+                  {errors.currentPassword && <Text color="red.500">{errors.currentPassword.message}</Text>}
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>New Password</FormLabel>
+                  <InputGroup>
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      {...register("newPassword", { minLength: { value: 8, message: "Password must be at least 8 characters" } })}
                     />
-                  </Box>
-
-                  <Flex position={"absolute"}>
-                    <Box
-                      width={"full"}
-                      objectFit={"cover"}
-                      mt={"60px"}
-                      ml={"45px"}
-                    >
-                      <input
-                        ref={inputRef}
-                        type="file"
-                        hidden
-                        onChange={(e) => {
-                          console.log(e.target.files);
-                        }}
-                        style={{ display: "none" }}
-                      />
-                      <Icon
-                        cursor={"pointer"}
-                        p={3}
-                        borderRadius={"full"}
-                        bg={"#D9D9D9"}
-                        fontSize={"40px"}
-                        as={RiEditLine}
-                        onClick={handleClick}
-                      />
-                    </Box>
-                  </Flex>
-                </Flex>
-              </Flex>
-
-              <Flex justify={"center"}>
-    
-              {/*/////////////////////////////////////// reacthook forms form /////////////////////////////////*/}
-
-              <form style={{width:'20rem'}}  onSubmit={handleSubmit(onSubmit)}>
-                <FormLabel>Name</FormLabel>
-                <Input borderRadius={0} {...register("example1", { required: true })} />
-                {errors.example1 && <Text color={'red'}>This field is required</Text>}
-
-                <FormLabel mt={5}>Email</FormLabel>            
-                <Input borderRadius={0} {...register("example2", { required: true })} />
-                {errors.example2 && <Text color={'red'}>This field is required</Text>}
-
-                <FormLabel mt={5}>Username</FormLabel>            
-                <Input borderRadius={0} {...register("example3", { required: true })} />
-                {errors.example3 && <Text color={'red'}>This field is required</Text>}
-
-                <FormLabel mt={5}>Password</FormLabel>            
-                    <InputGroup size='md'>
-                    <Input borderRadius={0}
-                      pr='4.5rem'
-                      {...register("example4", { required: true })} 
-                      type={show ? 'text' : 'password'}
-                      placeholder='Enter password'
-                    />
-                    <InputRightElement width='4.5rem'>
-                      <Button h='1.75rem' size='sm' onClick={handleClickShow}>
-                        {show ? 'Hide' : 'Show'}
+                    <InputRightElement width="4.5rem">
+                      <Button h="1.75rem" size="sm" onClick={() => setShowPassword(!showPassword)}>
+                        {showPassword ? "Hide" : "Show"}
                       </Button>
                     </InputRightElement>
                   </InputGroup>
-                {errors.example4 && <Text color={'red'}>This field is required</Text>}
+                  {errors.newPassword && <Text color="red.500">{errors.newPassword.message}</Text>}
+                </FormControl>
 
-             <Flex pt={8}>
-                <Button colorScheme="blue" cursor={"pointer"} type="submit">Submit</Button>
-              </Flex>
-              </form>
-              
-              </Flex>
-            </Flex>
-          </Flex>
-        </Flex>
+                <FormControl>
+                  <FormLabel>Confirm New Password</FormLabel>
+                  <Input
+                    type="password"
+                    {...register("confirmPassword", {
+                      validate: (value) => value === watch("newPassword") || "The passwords do not match"
+                    })}
+                  />
+                  {errors.confirmPassword && <Text color="red.500">{errors.confirmPassword.message}</Text>}
+                </FormControl>
+
+                <Button type="submit" colorScheme="blue" mt={4}>
+                  Save Changes
+                </Button>
+              </VStack>
+            </form>
+          </VStack>
+        </Box>
       </Flex>
-    </>
+    </Flex>
   );
 };
 
-export default settings;
+export default Settings;

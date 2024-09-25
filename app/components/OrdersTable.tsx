@@ -1,7 +1,6 @@
 "use client"
 
-import * as React from "react"
-
+import React, { useState, useMemo, useCallback } from "react"
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -13,6 +12,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  FilterFn,
 } from "@tanstack/react-table"
 import {
   Box,
@@ -33,10 +33,27 @@ import {
   Thead,
   Tr,
   Text,
+  Badge,
+  Select,
 } from "@chakra-ui/react"
 import { BiDotsHorizontal, BiDownArrow } from "react-icons/bi"
 import { BsCaretDown } from "react-icons/bs"
+import { useRouter } from 'next/navigation'
+import { useQuery } from "@tanstack/react-query"
+import { GetAllOrders } from "../api"
 
+// Types
+export type Orders = {
+  id: string
+  amount: number
+  status: "pending" | "processing" | "success" | "failed"
+  email: string
+  name: string
+  items: number
+  date: string
+}
+
+// Sample data
 const data: Orders[] = [
   {
     id: "m5gr84i9",
@@ -45,178 +62,174 @@ const data: Orders[] = [
     name: "Shakur",
     items: 5,
     email: "ken99@yahoo.com",
-    date: "25-11-2002"
+    date: "2024-09-25"
   },
   {
     id: "3u1reuv4",
     amount: 242,
     status: "success",
     name: "Shafiq",
-    items: 5,
+    items: 3,
     email: "Abe45@gmail.com",
-    date: "25-11-2002"
+    date: "2024-09-26"
   },
   {
     id: "derv1ws0",
     amount: 837,
     status: "processing",
     name: "Hamza",
-    items: 5,
+    items: 2,
     email: "Monserrat44@gmail.com",
-    date: "25-11-2002"
+    date: "2024-09-27"
   },
   {
     id: "5kma53ae",
     amount: 874,
     status: "success",
     name: "Limann",
-    items: 5,
+    items: 1,
     email: "Silas22@gmail.com",
-    date: "25-11-2002"
+    date: "2024-09-28"
   },
   {
     id: "bhqecj4p",
     amount: 721,
     status: "failed",
     name: "Loop",
-    items: 5,
+    items: 4,
     email: "carmella@hotmail.com",
-    date: "25-11-2002"
+    date: "2024-09-29"
   },
 ]
 
-export type Orders = {
-  id: string
-  amount: number
-  status: "pending" | "processing" | "success" | "failed"
-  email: string
-  name: string
-  items: number,
-  date: string
+// Custom date filter function
+const dateFilterFn: FilterFn<Orders> = (row, columnId, filterValue) => {
+  if (!filterValue) return true;
+  const rowValue = row.getValue(columnId) as string;
+  const filterDate = new Date(filterValue);
+  const rowDate = new Date(rowValue);
+  return rowDate.toDateString() === filterDate.toDateString();
+};
+
+const ActionCell = React.memo(({ order }: { order: Orders }) => {
+  const router = useRouter()
+  return (
+    <Menu>
+      <MenuButton as={IconButton} icon={<BiDotsHorizontal />} variant="ghost" aria-label="Options" />
+      <MenuList>
+        <MenuGroup title="Actions">
+          <MenuItem onClick={() => navigator.clipboard.writeText(order.id)}>
+            Copy Order ID
+          </MenuItem>
+          <MenuItem onClick={() => router.push(`/orders/${order.id}`)}>
+            View Order Details
+          </MenuItem>
+          <MenuItem onClick={() => alert(`Sending invoice to ${order.email}`)}>
+            Send Invoice
+          </MenuItem>
+          <MenuItem onClick={() => alert(`Refund initiated for Order ${order.id}`)}>
+            Initiate Refund
+          </MenuItem>
+        </MenuGroup>
+      </MenuList>
+    </Menu>
+  )
+})
+
+function formatString(name: string): string {
+  return name.replace(
+    /\w\S*/g,
+    (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).replace(/_/g, ' ');
 }
 
-export const columns: ColumnDef<Orders>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        isChecked={table.getIsAllPageRowsSelected()}
-        isIndeterminate={table.getIsSomePageRowsSelected()}
-        onChange={(e) => table.toggleAllPageRowsSelected(e.target.checked)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        isChecked={row.getIsSelected()}
-        onChange={(e) => row.toggleSelected(e.target.checked)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "status",
-    header: "Payment Status",
-    cell: ({ row }) => (
-      <Text textTransform="capitalize">{row.getValue("status")}</Text>
-    ),
-  },
+ActionCell.displayName = 'ActionCell'
 
+const columns: ColumnDef<any>[] = [
   {
-    accessorKey: "name",
-    header: "Customer Name",
-    cell: ({ row }) => (
-      <Text textTransform="capitalize">{row.getValue("name")}</Text>
-    ),
-  },
-
-  {
-    accessorKey: "date",
-    header: "Date",
-    cell: ({ row }) => (
-      <Text textTransform="capitalize">{row.getValue("date")}</Text>
-    ),
-  },
-  
-  {
-    accessorKey: "email",
-    header: ({ column }) => {
+    accessorKey: "fulfilmentStatus",
+    header: "Fulfilment Status",
+    cell: ({ row }) => {
+      const status = row.getValue("fulfilmentStatus") as string
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          rightIcon={<BiDownArrow />}
+        <Badge
+          colorScheme={
+            status === "success" ? "green" :
+            status === "pending" ? "yellow" :
+            status === "failed" ? "red" : "gray"
+          }
         >
-          Email
-        </Button>
+          {status}
+        </Badge>
       )
     },
-    cell: ({ row }) => <Text textTransform="lowercase">{row.getValue("email")}</Text>,
   },
-
   {
-    accessorKey: "items",
-    header: "Items",
+    accessorKey: "customerEmail",
+    header: "Customer Email",
     cell: ({ row }) => (
-      <Text textTransform="capitalize">{row.getValue("items")}</Text>
+      <Text>{row.getValue("customerEmail")}</Text>
     ),
   },
-
   {
-    accessorKey: "amount",
-    header: () => <Text textAlign="right">Amount</Text>,
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"))
-
-      // Format the amount as a dollar amount
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount)
-
-      return <Text textAlign="right" fontWeight="medium">{formatted}</Text>
-    },
+    accessorKey: "products",
+    header: "Date",
+    cell: ({ row }) => (
+      <Text>{JSON.stringify(row.getValue("products")[0].createdAt)}</Text>
+    ),
+    filterFn: dateFilterFn,
+  },
+  {
+    accessorKey: "products",
+    header: "Products",
+    cell: ({ row }) => (
+      row.getValue("products").map((prod) => (
+        <Text key={prod.id}>
+          {formatString(prod.productName)}, x {prod.quantity}
+        </Text>
+      ))
+    ),
+  },
+  {
+    accessorKey: "totalCost",
+    header: "Amount",
+    cell: ({ row }) => (
+      <Text>GHS {row.getValue("totalCost")}</Text>
+    ),
   },
   {
     id: "actions",
     enableHiding: false,
-    cell: ({ row }) => {
-      const Orders = row.original
-
-      return (
-        <Menu>
-          <MenuButton as={IconButton} icon={<BiDotsHorizontal />} variant="ghost" aria-label="Options">
-            <span className="sr-only">Open menu</span>
-          </MenuButton>
-          <MenuList>
-            <MenuGroup title="Actions">
-              <MenuItem onClick={() => navigator.clipboard.writeText(Orders.id)}>
-                Copy Orders ID
-              </MenuItem>
-              <MenuItem>View customer</MenuItem>
-              <MenuItem>View Orders details</MenuItem>
-            </MenuGroup>
-          </MenuList>
-        </Menu>
-      )
-    },
+    cell: ({ row }) => <ActionCell order={row.original} />,
   },
 ]
 
+
 export function OrderTable() {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = useState({})
+  const [globalFilter, setGlobalFilter] = useState("")
+
+
+const { data: orders, isPending, isRefetching } = useQuery({
+  queryKey: ['GetAllOrders'], 
+  queryFn: () => GetAllOrders()
+})
+
+console.log(orders)
 
   const table = useReactTable({
-    data,
+    data: orders,
     columns,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+      globalFilter,
+    },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -225,115 +238,166 @@ export function OrderTable() {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: "includesString",
+    filterFns: {
+      dateFilter: dateFilterFn,
     },
   })
 
+  const memoizedRows = useMemo(() => orders && table.getRowModel().rows, [orders, table])
+
+  const handleGlobalFilter = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setGlobalFilter(e.target.value)
+  }, [])
+
+  const handleStatusFilter = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    table.getColumn("status")?.setFilterValue(e.target.value)
+  }, [table])
+
+  const handleDateFilter = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    table.getColumn("date")?.setFilterValue(e.target.value)
+  }, [table])
+
+  const handlePageSizeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    table.setPageSize(Number(e.target.value))
+  }, [table])
+
   return (
-    <Box width="full">
-      <Flex alignItems="center" py={4}>
-        <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          maxWidth="sm"
-        />
-        <Menu>
-          <MenuButton as={Button} variant="outline" marginLeft="auto" rightIcon={<BsCaretDown />}>
-            Columns
-          </MenuButton>
-          <MenuList>
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => (
-                <MenuItem
-                  key={column.id}
-                  closeOnSelect={false}
-                  icon={
-                    <Checkbox
-                      isChecked={column.getIsVisible()}
-                      onChange={(e) => column.toggleVisibility(e.target.checked)}
-                    />
-                  }
-                >
-                  {column.id}
-                </MenuItem>
-              ))}
-          </MenuList>
-        </Menu>
+    <Box width="full" borderWidth="1px" borderColor="gray.200" borderRadius="md" overflow="hidden">
+      <Flex direction="column" p={4} bg="gray.50">
+        <Flex alignItems="center" mb={4} flexWrap="wrap" gap={2}>
+          <Input
+            placeholder="Search all columns..."
+            value={globalFilter ?? ""}
+            onChange={handleGlobalFilter}
+            maxWidth="sm"
+            borderRadius="md"
+          />
+          <Select
+            placeholder="Filter by status"
+            maxWidth="xs"
+            onChange={handleStatusFilter}
+            borderRadius="md"
+          >
+            <option value="success">Success</option>
+            <option value="processing">Processing</option>
+            <option value="failed">Failed</option>
+          </Select>
+          <Input
+            type="date"
+            placeholder="Filter by date"
+            maxWidth="xs"
+            onChange={handleDateFilter}
+            borderRadius="md"
+          />
+          <Menu>
+            <MenuButton as={Button} variant="outline" rightIcon={<BsCaretDown />} borderRadius="md">
+              Columns
+            </MenuButton>
+            <MenuList>
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => (
+                  <MenuItem
+                    key={column.id}
+                    closeOnSelect={false}
+                    icon={
+                      <Checkbox
+                        isChecked={column.getIsVisible()}
+                        onChange={(e) => column.toggleVisibility(!!e.target.checked)}
+                      />
+                    }
+                  >
+                    {column.id}
+                  </MenuItem>
+                ))}
+            </MenuList>
+          </Menu>
+          <Button onClick={() => alert("Exporting data...")} borderRadius="md">Export</Button>
+        </Flex>
       </Flex>
-      <Box border="1px" borderColor="gray.200" borderRadius="md">
-        <Table>
-          <Thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <Th key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </Th>
+      <Table variant="simple">
+        <Thead bg="gray.100">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <Tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <Th key={header.id} py={4} px={6} borderBottomWidth="2px">
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </Th>
+              ))}
+            </Tr>
+          ))}
+        </Thead>
+        <Tbody>
+          {memoizedRows?.length ? (
+            memoizedRows.map((row: any) => (
+              <Tr
+                key={row.id}
+                bg={row.getIsSelected() ? "blue.50" : undefined}
+                _hover={{ bg: "gray.100" }}
+              >
+                {row.getVisibleCells().map((cell: any) => (
+                  <Td key={cell.id} py={4} px={6} borderBottomWidth="1px">
+                    {flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext()
+                    )}
+                  </Td>
                 ))}
               </Tr>
+            ))
+          ) : (
+            <Tr>
+              <Td colSpan={columns.length} textAlign="center" py={8}>
+                No results.
+              </Td>
+            </Tr>
+          )}
+        </Tbody>
+      </Table>
+      <Flex alignItems="center" justifyContent="space-between" p={4} bg="gray.50">
+        <Flex alignItems="center" gap={2}>
+          <Select
+            value={table.getState().pagination.pageSize}
+            onChange={handlePageSizeChange}
+            borderRadius="md"
+          >
+            {[10, 20, 30, 40, 50].map((pageSize) => (
+              <option key={pageSize} value={pageSize}>
+                Show {pageSize}
+              </option>
             ))}
-          </Thead>
-          <Tbody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <Tr key={row.id} bg={row.getIsSelected() ? "blue.50" : undefined}>
-                  {row.getVisibleCells().map((cell) => (
-                    <Td key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </Td>
-                  ))}
-                </Tr>
-              ))
-            ) : (
-              <Tr>
-                <Td colSpan={columns.length} textAlign="center" height="24">
-                  No results.
-                </Td>
-              </Tr>
-            )}
-          </Tbody>
-        </Table>
-      </Box>
-      <Flex alignItems="center" justifyContent="end" py={4} gap={2}>
-        <Text flex="1" fontSize="sm" color="gray.600">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </Text>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          isDisabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          isDisabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+          </Select>
+          {/* <Text fontSize="sm" color="gray.600">
+            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          </Text> */}
+        </Flex>
+        <Flex alignItems="center" gap={2}>
+          <Button
+            variant="outline"
+            size="sm"
+            borderRadius="md"
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            borderRadius="md"
+          >
+            Next
+          </Button>
+        </Flex>
       </Flex>
     </Box>
   )
 }
+
 export default OrderTable

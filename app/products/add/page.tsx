@@ -1,42 +1,33 @@
 "use client";
 import React, { useState } from "react";
 import {
-  Flex,
-  Text,
   Box,
-  Image,
-  Link,
-  Button,
-  Divider,
+  Container,
+  VStack,
+  Heading,
+  SimpleGrid,
   FormControl,
   FormLabel,
-  Icon,
   Input,
+  Textarea,
+  Button,
   useToast,
-  FormHelperText,
+  Image,
+  IconButton,
   Spinner,
+  Flex,
+  Text,
 } from "@chakra-ui/react";
-import { IoIosArrowRoundBack } from "react-icons/io";
+import { ArrowBackIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/navigation";
 import { CreateProduct } from "@/app/api";
-import { AddProductSchema, AddType, ProductType } from "@/Schemas";
-
+import { ProductType } from "@/Schemas";
 
 const AddProducts = () => {
   const router = useRouter();
-
   const toast = useToast();
-
   const [loading, setLoading] = useState<boolean>(false);
-
-  
   const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
-
-
-  const handleGoBack = () => {
-    router.back(); // Navigates to the previous page
-  };
-
   const [data, setData] = useState<ProductType>({
     name: "",
     price: 0,
@@ -47,8 +38,42 @@ const AddProducts = () => {
     weight: "",
     expirationDate: "",
   });
+  const [errors, setErrors] = useState<Partial<Record<keyof ProductType, string>>>({});
+
+  const handleGoBack = () => {
+    router.back(); // Navigates to the previous page
+  };
+
+  const validateFields = (): boolean => {
+    const newErrors: Partial<Record<keyof ProductType, string>> = {};
+    let isValid = true;
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (!value && key !== 'price') {
+        newErrors[key as keyof ProductType] = 'This field is required';
+        isValid = false;
+      }
+    });
+
+    if (data.price <= 0) {
+      newErrors.price = 'Price must be greater than 0';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleProductCreate = async (payload: ProductType) => {
+    if (!validateFields()) {
+      toast({
+        title: "Please fill all required fields",
+        status: "error",
+        isClosable: true,
+      });
+      return;
+    }
+
     if (isImageLoading) {
       toast({
         title: "Image is still uploading, please wait.",
@@ -81,8 +106,10 @@ const AddProducts = () => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, files } = e.target;
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value, files } = e.target as HTMLInputElement;
   
     if (name === "price") {
       setData((prevData: ProductType) => ({ ...prevData, [name]: parseFloat(value) }));
@@ -107,210 +134,180 @@ const AddProducts = () => {
     } else {
       setData((prevData: ProductType) => ({ ...prevData, [name]: value }));
     }
+
+    // Clear the error for the field being changed
+    setErrors(prev => ({ ...prev, [name]: '' }));
   };
   
   
   
 
   return (
-    <>
-      <Flex ml={10}>
-        <Icon
-          cursor={"pointer"}
-          onClick={handleGoBack}
-          fontSize={"50px"}
-          as={IoIosArrowRoundBack}
+    <Box bg="gray.50" minHeight="100vh" py={8}>
+      <Container maxW="container.xl">
+        <VStack spacing={8} align="stretch">
+          <Flex gap={4}>        
+            <IconButton
+              icon={<ArrowBackIcon />}
+              onClick={handleGoBack}
+              aria-label="Go back"
+              mb={4}
+              size="lg"
         />
-      </Flex>
-      <Flex justify={"center"} bg={"#F9F9F8"} align={"center"} h={"100vh"} >
-        <Flex bg={"#F9F9F8"}>
-          <Flex direction={"column"} p={"30px"}>
-            <Flex p={3} gap={700} bg={"white"} border={'0.5px solid grey'} borderRadius={5} justify={"center"} align={"center"}>
-              <Text>Add New Products</Text>
- 
-            </Flex>
-
-            <Flex mt={5} bg={"white"} border={'0.5px solid grey'} borderRadius={5}>
-              <Flex direction={"column"} p={3}>
-                <Text>Upload Image</Text>
-                <Text color={"#C9C8C8"}>
-                  Upload Captivating images to make your product stand out
-                </Text>
-                <Divider
-                  border={"0.5px solid #000000"}
-                  w={"1000px"}
-                  orientation="horizontal"
-                />
-    
-                <Flex mt={5} gap={10}>
-                <Box
-                  bg={"#F9F9F8"}
-                  w={"300px"}
-                  h={"500px"}
-                  justifyContent={"center"}
-                  alignItems={"center"}
-                  display={"flex"}
-                  _hover={{ cursor: "pointer" }}
-                  position={"relative"}
-                >
-                  <Input
-                    id="image"
-                    display={"none"}
-                    border={"none"}
-                    type="file"
-                    name="image"
-                    onChange={handleInputChange}
-                    accept={"image/*"}
-                  />
-                  {isImageLoading ? (
-                    <Spinner />
-                  ) : data.image ? (
-                    <Image
-                      src={`data:image/jpeg;base64,${data.image}`}
-                      alt="Uploaded Image"
-                      objectFit="cover"
-                      w={"100%"}
-                      h={"100%"}
-                    />
-                  ) : (
-                    <Box as="label" htmlFor="image">
-                      <Flex
-                        cursor={"pointer"}
-                        justifyContent="center"
-                        alignItems="center"
-                      >
-                        Click to upload image
-                      </Flex>
-                    </Box>
-                  )}
-                </Box>
-                  <Flex direction={"column"}>
-                    <FormControl w={"full"}>
-                      <FormLabel w={"600px"} fontWeight={"bold"}>
-                        Product Name:
-                      </FormLabel>
-                      <Input
-                        id="name"
-                        variant={"flushed"}
-                        bg={"#F9F9F8"}
-                        borderRadius={0}
-                        type="text"
-                        name="name"
-                        value={data.name}
-                        onChange={handleInputChange}
-                      />
-                    </FormControl>
-
-                    <Flex gap={4} mt={6}>
-                      <FormControl w={"full"}>
-                        <FormLabel fontWeight={"bold"}>Category:</FormLabel>
-                        <Input
-                          id="category"
-                          variant={"flushed"}
-                          bg={"#F9F9F8"}
-                          w={"300px"}
-                          borderRadius={0}
-                          type="text"
-                          name="category"
-                          value={data.category}
-                          onChange={handleInputChange}
-                        />
-                      </FormControl>
-
-                      <FormControl w={"full"}>
-                        <FormLabel fontWeight={"bold"}>Dosage</FormLabel>
-                        <Input id="dosage" variant={"flushed"} bg={"#F9F9F8"} w={"300px"} borderRadius={0} type="text"
-                          name="dosage" value={data.dosage} onChange={handleInputChange}/>
-                      </FormControl>
-                    </Flex>
-
-                    <Flex>
-                      <FormControl mt={6} w={"full"}>
-                        <FormLabel fontWeight={"bold"}>Price:</FormLabel>
-                        <Input
-                          id="price"
-                          variant={"flushed"}
-                          bg={"#F9F9F8"}
-                          w={"300px"}
-                          borderRadius={0} 
-                          type="number"
-                          name="price"
-                          value={data.price}
-                          onChange={handleInputChange}
-                        />
-                      </FormControl>
-
-                      <FormControl mt={6} w={"full"}>
-                        <FormLabel fontWeight={"bold"}>Weight:</FormLabel>
-                        <Input
-                          id="weight"
-                          variant={"flushed"}
-                          bg={"#F9F9F8"}
-                          w={"300px"}
-                          placeholder="in kg"
-                          borderRadius={0}
-                          type="number"
-                          name="weight"
-                          value={data.weight}
-                          onChange={handleInputChange}
-                        />
-                      </FormControl>
-                    </Flex>
-
-                    <FormControl mt={6} w={"full"}>
-                      <FormLabel fontWeight={"bold"}>
-                        Expiration Date:
-                      </FormLabel>
-                      <Input
-                        id="expirationDate"
-                        variant={"flushed"}
-                        bg={"#F9F9F8"}
-                        w={"300px"}
-                        type="date"
-                        borderRadius={0}
-                        name="expirationDate"
-                        value={data.expirationDate}
-                        onChange={handleInputChange}
-                      />
-                    </FormControl>
-
-                    <FormControl w={"full"} mt={6}>
-                      <FormLabel w={"600px"} fontWeight={"bold"}>
-                        Description:
-                      </FormLabel>
-                      <Input
-                        id="description"
-                        variant={"flushed"}
-                        bg={"#F9F9F8"}
-                        h={"10vh"}
-                        borderRadius={0}
-                        type="text"
-                        name="description"
-                        value={data.description}
-                        onChange={handleInputChange}
-                      />
-                    </FormControl>
-
-                    <Flex mt={5} justify={"right"} align={"right"}>
-                      <Button
-                        colorScheme="blue"
-                        onClick={() => handleProductCreate(data)}
-                        color={"white"}
-                        type="submit"
-                        disabled={loading}
-                      >
-                        {loading ? "Creating Product" : "Submit"}
-                      </Button>
-                    </Flex>
-                  </Flex>
-
-                </Flex>
-              </Flex>
-            </Flex>
-          </Flex>
+          <Heading as="h1" size="xl">
+            Add New Product
+          </Heading>
+        
         </Flex>
-      </Flex>
-    </>
+
+          <Box bg="white" borderRadius="lg" boxShadow="md" p={6}>
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
+              <VStack spacing={6} align="stretch">
+                <FormControl>
+                  <FormLabel>Product Image</FormLabel>
+                  <Box
+                    borderWidth={2}
+                    borderStyle="dashed"
+                    borderRadius="md"
+                    p={4}
+                    textAlign="center"
+                    position="relative"
+                    height="300px"
+                    overflow="hidden"
+                  >
+                    <Input
+                      id="image"
+                      display="none"
+                      border="none"
+                      type="file"
+                      name="image"
+                      onChange={handleInputChange}
+                      accept="image/*"
+                    />
+                    {isImageLoading ? (
+                      <Spinner />
+                    ) : data.image ? (
+                      <Flex direction="column" align="center" justify="center" h="100%">
+                        <Image
+                          src={`data:image/jpeg;base64,${data.image}`}
+                          alt="Uploaded Image"
+                          objectFit="contain"
+                          maxW="100%"
+                          maxH="80%"
+                          mb={2}
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setData((prevData) => ({ ...prevData, image: "" }));
+                          }}
+                        >
+                          Remove Image
+                        </Button>
+                      </Flex>
+                    ) : (
+                      <Box as="label" htmlFor="image" height="100%" width="100%" display="flex" alignItems="center" justifyContent="center">
+                        <Flex
+                          border="1px solid #000"
+                          p={2}
+                          borderRadius={10}
+                          cursor="pointer"
+                          justifyContent="center"
+                          alignItems="center"
+                        >
+                          Click to upload image
+                        </Flex>
+                      </Box>
+                    )}
+                  </Box>
+                </FormControl>
+                <FormControl isInvalid={!!errors.name}>
+                  <FormLabel>Product Name</FormLabel>
+                  <Input
+                    name="name"
+                    value={data.name}
+                    onChange={handleInputChange}
+                  />
+                  {errors.name && <Text color="red.500" fontSize="sm">{errors.name}</Text>}
+                </FormControl>
+                <FormControl isInvalid={!!errors.description}>
+                  <FormLabel>Description</FormLabel>
+                  <Textarea
+                    name="description"
+                    value={data.description}
+                    onChange={handleInputChange}
+                    rows={4}
+                  />
+                  {errors.description && <Text color="red.500" fontSize="sm">{errors.description}</Text>}
+                </FormControl>
+              </VStack>
+              <VStack spacing={6} align="stretch">
+                <SimpleGrid columns={2} spacing={4}>
+                  <FormControl isInvalid={!!errors.category}>
+                    <FormLabel>Category</FormLabel>
+                    <Input
+                      name="category"
+                      value={data.category}
+                      onChange={handleInputChange}
+                    />
+                    {errors.category && <Text color="red.500" fontSize="sm">{errors.category}</Text>}
+                  </FormControl>
+                  <FormControl isInvalid={!!errors.dosage}>
+                    <FormLabel>Dosage</FormLabel>
+                    <Input
+                      name="dosage"
+                      value={data.dosage}
+                      onChange={handleInputChange}
+                    />
+                    {errors.dosage && <Text color="red.500" fontSize="sm">{errors.dosage}</Text>}
+                  </FormControl>
+                  <FormControl isInvalid={!!errors.price}>
+                    <FormLabel>Price</FormLabel>
+                    <Input
+                      name="price"
+                      type="number"
+                      value={data.price}
+                      onChange={handleInputChange}
+                    />
+                    {errors.price && <Text color="red.500" fontSize="sm">{errors.price}</Text>}
+                  </FormControl>
+                  <FormControl isInvalid={!!errors.weight}>
+                    <FormLabel>Weight (kg)</FormLabel>
+                    <Input
+                      name="weight"
+                      value={data.weight}
+                      onChange={handleInputChange}
+                    />
+                    {errors.weight && <Text color="red.500" fontSize="sm">{errors.weight}</Text>}
+                  </FormControl>
+                </SimpleGrid>
+                <FormControl isInvalid={!!errors.expirationDate}>
+                  <FormLabel>Expiration Date</FormLabel>
+                  <Input
+                    name="expirationDate"
+                    type="date"
+                    value={data.expirationDate}
+                    onChange={handleInputChange}
+                  />
+                  {errors.expirationDate && <Text color="red.500" fontSize="sm">{errors.expirationDate}</Text>}
+                </FormControl>
+                <Button
+                  colorScheme="blue"
+                  onClick={() => handleProductCreate(data)}
+                  isLoading={loading}
+                  loadingText="Submitting"
+                  size="lg"
+                  width="full"
+                  mt={4}
+                >
+                  Add Product
+                </Button>
+              </VStack>
+            </SimpleGrid>
+          </Box>
+        </VStack>
+      </Container>
+    </Box>
   );
 };
 

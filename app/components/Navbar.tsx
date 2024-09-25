@@ -92,7 +92,7 @@ const Navbar = () => {
                 </Flex>
               </Link>
 
-              <Link
+              {/* <Link
                 as={NextLink}
                 _hover={{ cursor: "pointer",bg:'#041E42', color:'white',p:'14px',transition:'0.1s', borderRadius:'10px', width:'100%' }}
                 className={`link ${pathname === "/chat" ? "active" : ""}`}
@@ -102,7 +102,7 @@ const Navbar = () => {
                   <Icon fontSize={"l"} as={TiMessages} />
                   <Text fontSize={"l"}>Messages</Text>
                 </Flex>
-              </Link>
+              </Link> */}
 
               <Link
                 as={NextLink}

@@ -14,7 +14,7 @@ import {
   import { useRouter } from 'next/navigation';
   import { IoIosArrowRoundBack } from "react-icons/io";
 
-const orderDetails = () => {
+const OrderDetails = () => {
   const router = useRouter();
 
   const handleBackButton = () => {
@@ -141,4 +141,4 @@ const orderDetails = () => {
       )
 }
 
-export default orderDetails
+export default OrderDetails

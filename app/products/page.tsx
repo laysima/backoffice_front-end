@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect, RefObject } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import "../globals.css";
 import {
@@ -7,73 +7,82 @@ import {
   Flex,
   Text,
   Image,
-  Link,
   SimpleGrid,
   Button,
   useToast,
-  GridItem,
-  Grid,
-  VStack,
-  Card, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure,
   Spinner,
   AlertDialog,
   AlertDialogOverlay,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogBody,
-  AlertDialogFooter
+  AlertDialogFooter,
+  useDisclosure,
+  Icon,
 } from "@chakra-ui/react";
-import PaginationControls from "../components/PaginationControls";
 import { DeleteProduct, GetProducts } from "@/app/api";
 import { ProductType } from "@/Schemas";
 import { useQuery } from "@tanstack/react-query";
 import ProductModal from "../components/EditProductModal";
-import { ImSpinner8 } from "react-icons/im";
 import { GoInfo } from "react-icons/go";
+import { motion } from "framer-motion";
+import { IoPersonCircleOutline } from "react-icons/io5";
+import { getCookie } from "cookies-next";
+import { useRouter } from "next/navigation";
 
 function formatString(name: string): string {
   return name.replace(
     /\w\S*/g,
     (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-  );
+  ).replace(/_/g, ' ');
 }
 
 export default function GetAllProducts({
-  searchParams, }: { searchParams: { [key: string]: string | string[] | undefined };
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
 }): JSX.Element {
-
-  const { data: products } = useQuery({queryKey: ['products'], queryFn: async () => {
-    const res = await fetch('/api/products')
-    return res?.ok ? res.json() : []
-    }})
-
-    const OverlayOne = () => (
-      <ModalOverlay
-      bg='none'
-      backdropFilter='auto'
-      backdropInvert='10%'
-      backdropBlur='2px'
-      />
-    )
-
-  const page = searchParams["page"] ?? "1";
-
-  const per_page = searchParams["per_page"] ?? "4";
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [getData, setData] = useState<[]>(products || [])
+  const [getData, setData] = useState<ProductType[]>([]);
+
+  const [currentProduct, setCurrentProduct] = useState<ProductType | null>(null);
 
   const [deletingProduct, setDeletingProduct] = useState<string | null>(null);
 
-  const [overlay, setOverlay] = React.useState(<OverlayOne />)
+  const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onClose: onDeleteModalClose } = useDisclosure();
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onClose: onEditModalClose } = useDisclosure();
 
-  const cancelRef = React.useRef<any>()
-  
+  const cancelRef = React.useRef<any>();
 
   const toast = useToast();
+
+  const router = useRouter();
+
+  const session = getCookie("session");
+
+  const nSession = session && JSON.parse(session);
+
+  function formatName(name: string) {
+    const nameParts = name.split(' ');
+    const firstName = nameParts[0];
+    return firstName;
+  }
+
+
+function formatNumber(num: number) {
+  return num.toLocaleString('en-US', { style: 'currency', currency: 'GHS' });
+}
+
+function formatString(name: string): string {
+  return name.replace(
+    /\w\S*/g,
+    (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).replace(/_/g, ' ');
+}
+
 
   useEffect(() => {
     getAllProducts();
@@ -86,7 +95,6 @@ export default function GetAllProducts({
       if (data && typeof data === "object") {
         setData(data);
       } else {
-        ;
         toast({
           title: "Unexpected response format",
           status: "error",
@@ -103,6 +111,7 @@ export default function GetAllProducts({
       setLoading(false);
     }
   };
+
   const deleteProduct = async (
     name: string,
     category: string
@@ -117,7 +126,7 @@ export default function GetAllProducts({
           isClosable: true,
         });
         getAllProducts();
-        onClose(); // Close the modal after successful deletion
+        onDeleteModalClose();
       }
     } catch (error) {
       toast({
@@ -131,157 +140,147 @@ export default function GetAllProducts({
   };
 
   return (
-    <>
-      <Flex bg="#F9F9F8">
-        <Flex>
-          <Navbar />
-        </Flex>
-        <Flex direction={"column"} p={"30px"} w={"100%"} overflowY="scroll" h={'100dvh'}>
-        <Flex p={2} bg={"white"}  justify={"center"} align={"center"}>
-        <Flex align="center" grow={1}>
-              <Button colorScheme="blue" borderRadius={0} as="a" href="/products/add">
-                  + Add new Products
-              </Button>
-            </Flex>
-              <Text flexShrink={0} borderRadius={0}>
-                Products
+    <Flex bg="#F0F4F8" w="100%" h="100dvh">
+      <Flex>
+        <Navbar />
+      </Flex>
+      <Flex direction="column" p="30px" w="100%" overflowY="scroll" h="100dvh">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Flex p={4} bg="white" justify="space-between" align="center" borderRadius="lg" boxShadow="sm">
+            <Text fontSize="2xl" fontWeight="bold">Products</Text>
+            <Flex align="center">
+              <Icon as={IoPersonCircleOutline} boxSize={10} color="blue.500" />
+              <Text fontWeight={500} ml={2} fontSize="17px">
+                {nSession ? formatName(nSession?.name) : "/"}
               </Text>
             </Flex>
+          </Flex>
+        </motion.div>
 
-            {loading && (
-       <Flex height="100vh" alignItems="center" justifyContent="center">
-       <Spinner size="xl" />
-     </Flex>
-    )}
-      {getData?.length > 0 && (
-        <Box p={5} bg={"white"} mt={5} as="a">
-        <SimpleGrid columns={3} spacing={10}>
-          {getData?.map((product:any, index:any)=>(          
-            <Box 
-              key={index} 
-              borderWidth="1px" 
-              borderRadius="lg" 
-              overflow="hidden" 
-              boxShadow="md" 
-              p={5} 
-              maxW="sm"
-              h="full"
-            >
-              <Flex align={"right"} justify={'right'} as="a" href={`products/${product.id}`}>
-                <GoInfo size={'25px'}/>
-              </Flex>
-              <Flex direction="column" h="full">
-                <Image boxSize="150px" borderRadius="10px"objectFit="cover"src={product.image}
-                  alt={product.name}mx="auto"mb={4}
-                />
-                <SimpleGrid columns={1} spacingX="10px" spacingY="5px" mb={4}>
-  
-                  <Box alignContent={"center"} justifyContent={"center"}>
-                    <Text fontWeight={'bold'}>{formatString(product.name)}</Text>
-                  </Box>
+        <Flex mt={6} justify="space-between" align="center">
+          <Button colorScheme="blue" as="a" href="/products/add">
+            + Add new Products
+          </Button>
+        </Flex>
 
-    
-                  <Box>
-                    <Text>₵{product.price}</Text>
-                  </Box>
-
-      
-            
-                </SimpleGrid>
-                <Flex justify={"center"} align={"center"} gap={8}>
-                {/* <Button
-                  onClick={() => deleteProduct(product.name, product.category)}
-                  isLoading={deletingProduct === product.name}
-                  mt="auto"
-                  alignSelf="center"
-                  colorScheme="red"
+        {loading ? (
+          <Flex height="50vh" alignItems="center" justifyContent="center">
+            <Spinner size="xl" />
+          </Flex>
+        ) : getData.length > 0 ? (
+          <SimpleGrid columns={[1, 2, 3, 4]} spacing={6} mt={6}>
+            {getData.map((product: ProductType, index: number) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Box
+                  borderWidth="1px"
+                  borderRadius="lg"
+                  overflow="hidden"
+                  boxShadow="md"
+                  p={5}
+                  bg="white"
                 >
-                  {deletingProduct === product.name ? "Deleting..." : "Delete"}
-                </Button> */}
-                <ProductModal/>  
+                  <Flex justify="flex-end" mb={2}>
+                    <Icon 
+                      as={GoInfo} 
+                      boxSize={6} 
+                      color="blue.500" 
+                      cursor="pointer" 
+                      onClick={() => router.push(`products/${product.id}`)} 
+                    />
+                  </Flex>
+                  {product.image && (
+                    <Image
+                      boxSize="150px"
+                      objectFit="cover"
+                      src={product.image}
+                      alt={product.name}
+                      mx="auto"
+                      mb={4}
+                    />
+                  )}
+                  <Text fontWeight="bold" mb={2}>{formatString(product.name)}</Text>
+                  <Text mb={4}>{formatNumber(product.price)}</Text>
+                  <Flex justify="space-between">
+                    <Button size="sm" onClick={() => {
+                      setCurrentProduct(product)
+                      onEditModalOpen()
+                    }}>
+                      Edit
+                    </Button>
+                    <Button size="sm" colorScheme="red" onClick={() => {
+                      setCurrentProduct(product)
+                      onDeleteModalOpen()
+                    }}>
+                      Delete
+                    </Button>
+                  </Flex>
+                </Box>
+              </motion.div>
+            ))}
+          </SimpleGrid>
+        ) : (
+          <Flex justify="center" align="center" h="50vh" direction="column" gap={5}>
+            <Text>No products found</Text>
+            <Button onClick={getAllProducts}>
+              Refresh
+            </Button>
+          </Flex>
+        )}
 
-                {/* <Button colorScheme="red" onClick={() => {setOverlay(<OverlayOne />) 
-                    onOpen()}}>
-                  Delete
-                </Button> */}
-    
-        {/* <Modal isCentered isOpen={isOpen} onClose={onClose}>
-          {overlay}
-          <ModalContent>
-            <ModalHeader>Are you sure you want to delete</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-            </ModalBody>
-            <ModalFooter gap={4}>
-              <Button onClick={onClose}>NO</Button>
-              <Button
-                  onClick={() => deleteProduct(product.name, product.category)}
-                  isLoading={deletingProduct === product.name}
-                  mt="auto"
-                  alignSelf="center"
-                  colorScheme="red"
-                >
-                  {deletingProduct === product.name ? "Deleting..." : "Delete"}
+        {currentProduct && (
+          <ProductModal 
+            product={currentProduct} 
+            isOpen={isEditModalOpen} 
+            onOpen={onEditModalOpen} 
+            onClose={() => {
+              onEditModalClose()
+              setCurrentProduct(null)
+            }} 
+          />
+        )}
+
+        <AlertDialog
+          isOpen={isDeleteModalOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={onDeleteModalClose}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                Delete Product
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                Are you sure? You can&apos;t undo this action afterwards.
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button ref={cancelRef} onClick={onDeleteModalClose}>
+                  Cancel
                 </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal> */}
-
-<Button colorScheme='red' onClick={onOpen}>
-        Delete
-      </Button>
-
-      <AlertDialog
-        isOpen={isOpen}
-        leastDestructiveRef={cancelRef}
-        onClose={onClose}
-      >
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
-              Delete Customer
-            </AlertDialogHeader>
-
-            <AlertDialogBody>
-              Are you sure? You can&apos;t undo this action afterwards.
-            </AlertDialogBody>
-
-            <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onClose}>
-                Cancel
-              </Button>
-              <Button
+                <Button
                   colorScheme='red' ml={3}
                   onClick={() => {
-                    deleteProduct(product.name, product.category)
+                    currentProduct && deleteProduct(currentProduct?.name, currentProduct?.category)
                   }}
-                  isLoading={deletingProduct === product.name}
-                  mt="auto"
-                  alignSelf="center"
+                  isLoading={deletingProduct === currentProduct?.name}
                 >
-                  {deletingProduct === product.name ? "Deleting..." : "Delete"}
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-                </Flex>
-              </Flex>
-            </Box>
-          ))}
-        </SimpleGrid>
-      </Box>
-      )}
-
-    
-
-          <PaginationControls
-            hasNextPage={false} // Adjust logic if you need pagination for categories
-            hasPrevPage={false} // Adjust logic if you need pagination for categories
-          />
-        </Flex>
+                  {deletingProduct === currentProduct?.name ? "Deleting..." : "Delete"}
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
       </Flex>
-    </>
-    
+    </Flex>
   );
 }

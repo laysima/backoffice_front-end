@@ -39,10 +39,10 @@ export const EditProduct = async ({newCategory, newName,oldName, oldCategory, we
   }
 };
 
-export const LoginUser = async ({ username, password }:LoginType) => {
+export const LoginUser = async ({ email, password }:LoginType) => {
   const URL = '/v1/user/login';
   try {
-      const response = await client.post(URL, { username, password}) 
+      const response = await client.post(URL, { email, password}) 
       const  { data } = response.data;
       return data
   } catch (e:any) {
@@ -77,3 +77,23 @@ export const DeleteProduct = async ({
     throw new Error(e.response.data.error.message);
   }
 };
+
+export const GetAllOrders = async () => {
+  const URL = `/v1/orders`;
+
+  try {
+      const response = await client.get(URL);
+      const { data } = response.data;
+
+      console.log(data)
+      
+      return data
+  } catch (e: any) {
+      throw new Error(e.response.data.error.message)
+  }
+}
+
+// const { data: orders, isPending, isRefetching } = useQuery({
+//   queryKey: ['getOrderHistory'], 
+//   queryFn: () => GetAllOrders()
+// })

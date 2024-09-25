@@ -1,5 +1,5 @@
 'use client'
-import { Box, Text, Spinner, Flex, Grid, GridItem, Heading, Divider, Card, CardHeader, CardBody, Image, Icon, Button } from '@chakra-ui/react';
+import { Box, Text, Spinner, Flex, VStack, Heading, Divider, Image, Button, Container, SimpleGrid, Badge } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import React from 'react'
@@ -7,99 +7,85 @@ import { IoIosArrowRoundBack } from 'react-icons/io';
 
 const ProductDetails = ({params}: { params: { id: string }}) => {
 
-    const id = params.id;
+	const id = params.id;
 
-    const { data: product, isLoading  } = useQuery({queryKey: [`product_${id}`, id], queryFn: async () => {
-      const res = await fetch(`/api/products/${id}`)
-      return res?.ok ? res.json() : []
-      }, ...{enabled:!!id}})
+	const router = useRouter();
 
-      console.log(product)
+	const { data: product, isLoading } = useQuery({
+		queryKey: [`product_${id}`, id],
+		queryFn: async () => {
+			const res = await fetch(`/api/products/${id}`)
+			return res?.ok ? res.json() : null
+		},
+		enabled: !!id
+	});
 
-      const router = useRouter()
+	const handleGoBack = () => router.back();
 
-      const handleGoBack = () => {
-        router.back(); // Navigates to the previous page
-      };
+	function formatNumber(num: number, currency = 'GHS') {
+		return num.toLocaleString('en-US', { style: 'currency', currency });
+	  }
 
- 
-    
-  return (
-    <>
+	function formatString(name: string): string {
+		return name.replace(
+		/\w\S*/g,
+		(word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+		).replace(/_/g, ' ');
+	}
 
-    {isLoading && (
-        <Flex height="100vh" alignItems="center" justifyContent="center">
-        <Spinner size="xl" />
-      </Flex>
-      )}
+	if (isLoading) {
+		return (
+			<Flex height="100vh" alignItems="center" justifyContent="center">
+				<Spinner size="xl" />
+			</Flex>
+		);
+	}
 
-    {product && (
-        <>
-<Flex alignItems="center" justifyContent="center" minHeight="100vh" p={5}>
-            <Card maxW="600px" w="full" boxShadow="lg" borderRadius="lg">
-              <CardHeader bg="blue.500" color="white" borderTopRadius="lg" p={4}>
-                <Heading size="md">Product Details</Heading>
-              </CardHeader>
-              <CardBody p={6}>
-                <Image src={product.image} alt={product.name} borderRadius="md"  />
-                <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-                  <GridItem colSpan={2}>
-                    <Text fontSize="2xl" fontWeight="bold" mb={4}>{product.name}</Text>
-                    <Divider mb={4} />
-                  </GridItem>
-                  
-                  <GridItem>
-                    <Text fontWeight={900}>Price:</Text>
-                  </GridItem>
-                  <GridItem>
-                    <Text>₵{product.price}</Text>
-                  </GridItem>
+	if (!product) {
+		return (
+			<Container maxW="container.xl" py={10}>
+					<Text>Product not found</Text>
+					<Button mt={4} onClick={handleGoBack} leftIcon={<IoIosArrowRoundBack />}>Go back</Button>
+			</Container>
+		);
+	}
 
-                  <GridItem>
-                    <Text fontWeight={900}>Weight:</Text>
-                  </GridItem>
-                  <GridItem>
-                    <Text>{product.weight}</Text>
-                  </GridItem>
-
-                  <GridItem>
-                    <Text fontWeight={900}>Dosage:</Text>
-                  </GridItem>
-                  <GridItem>
-                    <Text>{product.dosage}</Text>
-                  </GridItem>
-
-                  <GridItem>
-                    <Text fontWeight={900}>Category:</Text>
-                  </GridItem>
-                  <GridItem>
-                    <Text>{product.category}</Text>
-                  </GridItem>
-
-                  <GridItem>
-                    <Text fontWeight={900}>Expiration Date:</Text>
-                  </GridItem>
-                  <GridItem>
-                    <Text>{product.expirationDate}</Text>
-                  </GridItem>
-
-                  <GridItem>
-                    <Text fontWeight={900}>Description:</Text>
-                  </GridItem>
-                  <GridItem>
-                    <Text>{product.description}</Text>
-                  </GridItem>
-                </Grid>
-              </CardBody>
-            </Card>
-            <Flex ml={10}>
-      <Button onClick={handleGoBack}>Go back</Button>
-    </Flex>
-          </Flex>
-        </>
-    )}
-    </>
-  )
+	return (
+		<Container maxW="container.xl" py={10}>
+			<Button mb={6} onClick={handleGoBack} leftIcon={<IoIosArrowRoundBack />}>Go back</Button>
+			<SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
+				<Box>
+					<Image src={product.image} alt={product.name} borderRadius="lg" objectFit="cover" w="100%" h="auto" />
+				</Box>
+				<VStack align="stretch" spacing={6}>
+					<Heading size="xl">{formatString(product.name)}</Heading>
+					<Badge colorScheme="blue" fontSize="md" alignSelf="flex-start">{product.category}</Badge>
+					<Text fontSize="3xl" fontWeight="bold" color="blue.500">
+						{formatNumber(product.price)}
+					</Text>
+					<Divider />
+					<SimpleGrid columns={2} spacing={4}>
+						<Box>
+							<Text fontWeight="bold">Weight:</Text>
+							<Text>{product.weight}</Text>
+						</Box>
+						<Box>
+							<Text fontWeight="bold">Dosage:</Text>
+							<Text>{product.dosage}</Text>
+						</Box>
+						<Box>
+							<Text fontWeight="bold">Expiration Date:</Text>
+							<Text>{product.expirationDate}</Text>
+						</Box>
+					</SimpleGrid>
+					<Box>
+						<Text fontWeight="bold" mb={2}>Description:</Text>
+						<Text>{product.description}</Text>
+					</Box>
+				</VStack>
+			</SimpleGrid>
+		</Container>
+	);
 }
 
-export default ProductDetails
+export default ProductDetails;

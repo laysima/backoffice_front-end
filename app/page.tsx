@@ -13,15 +13,15 @@ import { useRouter } from "next/navigation";
 import { getCookie, setCookie } from "cookies-next";
 import { LoginUser } from "./api";
 
-
-
-
-const page = () => {
+const Page = () => {
   const [show, setShow] = React.useState(false);
+
   const handleClick = () => setShow(!show);
 
   const toast = useToast()
+
   const router = useRouter();
+
   const session  = getCookie('session');
 
   const [loading, setLoading] = useState(false);
@@ -31,52 +31,54 @@ const page = () => {
     }
   },[]) 
 
-    const { control, handleSubmit, formState: { errors },} = useForm<LoginType>
-    (
-      {
-        resolver:zodResolver(LoginSchema)
-      }
-    )
+  const { control, handleSubmit, formState: { errors },} = useForm<LoginType>
+  (
+    {
+      resolver:zodResolver(LoginSchema)
+    }
+  )
   
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      handleSubmit(onSubmit)();
+    }
+  };
 
-    const onSubmit = async (payload:LoginType) => {
-      setLoading(true)
+  const onSubmit = async (payload:LoginType) => {
+    setLoading(true)
   
-  
-      console.log('payload', payload)
-      
-      try {
-      const data = await LoginUser(payload)
-      if (data) {
-        if (data.role !== 'admin') {
-          toast({
-            title: 'Access Denied',
-            status: 'error',
-            isClosable: true,
-          })
-        } else {
-          setCookie('session', JSON.stringify(data))
-          router.replace('/dashboard')
-          toast({
-            title: 'Success',
-            status: 'success',
-            isClosable: true,
-          })
-        }
-      }
-      } 
-      catch (e:any) {
+    console.log('payload', payload)
+    
+    try {
+    const data = await LoginUser(payload)
+    if (data) {
+      if (data.role !== 'admin') {
         toast({
-          title: e.message,
+          title: 'Access Denied',
           status: 'error',
           isClosable: true,
         })
+      } else {
+        setCookie('session', JSON.stringify(data))
+        router.replace('/dashboard')
+        toast({
+          title: 'Success',
+          status: 'success',
+          isClosable: true,
+        })
       }
-      setLoading(false)
-
     }
+    } 
+    catch (e:any) {
+      toast({
+        title: e.message,
+        status: 'error',
+        isClosable: true,
+      })
+    }
+    setLoading(false)
 
-
+  }
 
   return (
     <Grid templateColumns="1fr 4fr">
@@ -91,12 +93,12 @@ const page = () => {
       <GridItem h={"100vh"} bg={"white"}>
         <Flex justify={"center"} w={"full"}>
           <Box w={"300px"} mt={"60px"}>
-            <Image objectFit={"cover"} src="pharmainc.svg"></Image>
+            <Image alt="pharmainc" objectFit={"cover"} src="pharmainc.svg" />
           </Box>
         </Flex>
 
         <Flex justify={"center"} w={"full"} mb={10}>
-          <FormControl w={"30rem"} p={"62px 28px"} borderRadius={7}>
+          <FormControl w={"30rem"} p={"62px 28px"} borderRadius={7} as="form" onSubmit={handleSubmit(onSubmit)}>
             <Flex direction={"column"} gap={1}>
               <Text fontWeight={500} fontFamily={'"Outfit", sans-serif'} fontSize={"4xl"}>
                 LOGIN
@@ -105,14 +107,15 @@ const page = () => {
 
             <Flex mt={5} direction={"column"} w={"full"} align={"center"}>
               <Flex direction={"column"} align={"start"} w={"full"}>
-              <Controller control={control} name={"username"} render={({ field }) => (
+              <Controller control={control} name={"email"} render={({ field }) => (
                 <Input borderRadius={0} boxShadow={"1px 1px 8px 5px #EAEFF2, 0 0 10px #EAEFF2"} h={"7vh"} border={"1px solid #EAEFF2"}
-                  type="email" value={field.value} onChange={(e) => field.onChange(e.target.value)}
+                  type="text" value={field.value} onChange={(e) => field.onChange(e.target.value)}
+                  onKeyDown={handleKeyDown}
                 />
               )}
               />
-                <FormHelperText color={errors.username? 'red' : ''}>
-                  { errors.username ? errors.username.message: 'Please Enter Your Username'}
+                <FormHelperText color={errors.email? 'red' : ''}>
+                  { errors.email ? errors.email.message: 'Please Enter Your Email'}
                 </FormHelperText>
               </Flex>
             </Flex>
@@ -123,6 +126,7 @@ const page = () => {
                 <Controller control={control} name={"password"} render={({ field }) => (
                   <Input borderRadius={0} boxShadow={"1px 1px 8px 5px #EAEFF2, 0 0 10px #EAEFF2"} h={"7vh"} pr="4.5rem"
                     type={show ? "text" : "password"} value={field.value} onChange={(e) => field.onChange(e.target.value)}
+                    onKeyDown={handleKeyDown}
                   />
                 )}
                 />
@@ -139,7 +143,7 @@ const page = () => {
             </Flex>
 
             <Flex justify={"center"} mt={10}>
-            <Button colorScheme="blue" type="submit" onClick={handleSubmit(onSubmit)} isLoading={loading}>
+            <Button colorScheme="blue" type="submit" isLoading={loading}>
               {loading? 'Signing In.....':  "Sign In"}
             </Button>
             </Flex>
@@ -150,4 +154,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
